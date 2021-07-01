@@ -5,7 +5,9 @@
 
 #include <signal.h>
 #include <netdb.h>
+
 #include <sys/time.h>
+#include <sys/socket.h>
 
 // struct hostent {
 //     char  *h_name;            /* official name of host */
@@ -15,7 +17,11 @@
 //     char **h_addr_list;       /* list of addresses */
 // }
 
-typedef struct  timeval t_time;
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+               const struct sockaddr *dest_addr, socklen_t addrlen);
+
+
+typedef struct timeval t_time;
 
 typedef struct  s_statistics {
     t_time      begin_date;

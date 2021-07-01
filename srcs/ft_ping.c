@@ -33,16 +33,18 @@ void    SIGINT_handler()
     pinging_loop = false;
 }
 
-// void    open_socket(const char *p)
-// {
-//     int sock_r = socket(AF_PACKET, SOCK_RAW, IPPROTO_ICMP);
+int     open_socket()
+{
+    int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_ICMP);
  
-//     if (sock_r < 0)
-//     {
-//         printf("[ERROR] Socket can't be created, code: %d\n", sock_r);
-//         exit(0);
-//     }
-// }
+    if (sockfd < 0)
+    {
+        printf("[ERROR] Socket can't be created, code: %d\n", sockfd);
+        exit(0);
+    }
+    // printf("socket fd: %d\n", sockfd);
+    return sockfd;
+}
 
 int     main(int argc, char **argv)
 {
@@ -65,9 +67,15 @@ int     main(int argc, char **argv)
     // Get hostname info
     struct hostent *dns_lookup = gethostbyname(hostname);
 
-    while (pinging_loop)
+    // while (pinging_loop)
+    if (pinging_loop)
     {
         // printf("pinging ...\n");
+        int sockfd = open_socket(hostname);
+        printf("sockfd: %d\n", sockfd);
+        buff = "ping";
+        int send_ret = sendto(sockfd, buff, sizeof(buff), 0, NULL, 0);
+        
     }
 
     printf("dns_lookup: %p\n", dns_lookup);
