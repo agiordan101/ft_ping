@@ -4,9 +4,9 @@ static char     *hostname = NULL;
 static bool     pinging_loop = true;
 t_statistics    stats = (t_statistics){};
 
-t_time      get_time()
+struct timeval      get_time()
 {
-    t_time  time;
+    struct timeval  time;
     int     ret;
 
     if ((ret = gettimeofday(&time, NULL)))
@@ -19,7 +19,7 @@ t_time      get_time()
 
 void    SIGINT_handler()
 {
-    t_time end_date = get_time();
+    struct timeval end_date = get_time();
     // printf("ctrlc s: %lu\n", (unsigned long)stats.begin_date.tv_sec);
     // printf("ctrlc s: %lu\n", (unsigned long)end_date.tv_sec);
     // printf("ctrlc s diff: %lu\n", (unsigned long)end_date.tv_sec - (unsigned long)stats.begin_date.tv_sec);
@@ -28,8 +28,8 @@ void    SIGINT_handler()
     // printf("ctrlc ms diff: %lu\n", end_date.tv_usec - stats.begin_date.tv_usec);
 
     printf("--- %s ping statistics ---\n", hostname);
-    printf("%d packets transmitted, %d received, %.2f%% packet loss, time %lds\n", stats.p_sent, stats.p_received, stats.p_sent ? (100 * stats.p_received / (float)stats.p_sent) : 0., end_date.tv_sec - stats.begin_date.tv_sec);
-    printf("rtt min/avg/max/mdev = %.2f/%.2f/%.2f/%.2f ms\n", stats.rtt_min, stats.rtt_n ? (stats.rtt_sum / stats.rtt_n) : 0., stats.rtt_max, stats.rtt_mdev);
+    printf("%d packets transmitted, %d received, %.3f%% packet loss, time %lds\n", stats.p_sent, stats.p_received, stats.p_sent ? (100 * stats.p_received / (float)stats.p_sent) : 0., end_date.tv_sec - stats.begin_date.tv_sec);
+    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", stats.rtt_min, stats.rtt_n ? (stats.rtt_sum / stats.rtt_n) : 0., stats.rtt_max, stats.rtt_mdev);
     pinging_loop = false;
 }
 
@@ -39,11 +39,47 @@ int     open_socket()
  
     if (sockfd < 0)
     {
-        printf("[ERROR] Socket can't be created, code: %d\n", sockfd);
+        printf("[ERROR] Socket can't be created: \n");
+        perror(NULL);
         exit(0);
     }
     // printf("socket fd: %d\n", sockfd);
     return sockfd;
+}
+
+int     pinging(const char *ipv4)
+{
+    int                 sockfd;
+    char                *buff;
+    int                 send_ret;
+    struct sockaddr_in  sockaddr;
+    int                 ret;
+
+    // while (pinging_loop)
+    if (pinging_loop)
+    {
+        printf("pinging ...\n");
+
+        sockfd = open_socket(hostname);
+        printf("sockfd: %d\n", sockfd);
+
+        sockaddr = (struct sockaddr_in){AF_INET, 42, (struct in_addr){0}, {0x0}};
+        if ((ret = inet_pton(AF_INET, ipv4, &sockaddr.sin_addr)) == -1) // Convert IPv4 to struct in_addr
+            perror(NULL), exit(0);
+
+        printf("inet_pton return: %d\n", ret);
+        printf("sockaddr: >%d / %d / %d / %s<\n", sockaddr.sin_family, sockaddr.sin_port, sockaddr.sin_addr.s_addr, (char *)sockaddr.sin_zero);
+
+        buff = "ping?";
+        send_ret = sendto(sockfd, buff, sizeof(buff), 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
+
+        printf("send_ret: %d\n", send_ret);
+        if (send_ret == -1)
+            perror(NULL), exit(0);
+
+        close(sockfd);
+    }
+    return 0;
 }
 
 int     main(int argc, char **argv)
@@ -67,19 +103,10 @@ int     main(int argc, char **argv)
     // Get hostname info
     struct hostent *dns_lookup = gethostbyname(hostname);
 
-    // while (pinging_loop)
-    if (pinging_loop)
-    {
-        // printf("pinging ...\n");
-        int sockfd = open_socket(hostname);
-        printf("sockfd: %d\n", sockfd);
-        buff = "ping";
-        int send_ret = sendto(sockfd, buff, sizeof(buff), 0, NULL, 0);
-        
-    }
-
     printf("dns_lookup: %p\n", dns_lookup);
-    // printf("h_name: %s / h_addrtype: %d / h_length: %d\n", dns_lookup->h_name, dns_lookup->h_addrtype, dns_lookup->h_length);
+    printf("h_name: %s / h_addrtype: %d / h_length: %d\n", dns_lookup->h_name, dns_lookup->h_addrtype, dns_lookup->h_length);
+
+    pinging("255.255.255.255");
 
     return 0;
 }

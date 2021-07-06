@@ -28,21 +28,17 @@ $(NAME): $(BINS)
 	@$(CC) $(CFLAGS) -o $@ $^ -I $(INC_PATH)
 	@echo "\n[EXECUTABLE \"$(NAME)\" READY]\n"
 
-
 $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 
 	@mkdir -p $(BIN_PATH) || true
 	@$(CC) $(CFLAGS) -I $(INC_PATH) -o $@ -c $< && echo " \c"
 
-
 clean:
-
-	@echo "[CLEANING $(NAME) BINARIES]\n"
 	@rm -Rf $(BIN_PATH)
+	@echo "\n[CLEANING $(NAME) BINARIES]"
 
 fclean: clean
-
-	@echo "\n[REMOVING \"$(NAME)\"]"
 	@rm -f $(NAME)
+	@echo "\n[REMOVING \"$(NAME)\"]"
 
 re: fclean all
