@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <errno.h>
 
@@ -28,10 +29,11 @@
 //     socklen_t addrlen
 // );
 
-// typedef struct timeval  t_time;
-// typedef struct hostent  t_hostent;
-// typedef struct sockaddr t_sockaddr;
-// typedef struct sockaddr_in t_sockaddr_in;
+// int setsockopt(int socket_descriptor,
+//                 int level,
+//                 int option_name,
+//                 char *option_value,
+//                 int option_length)
 
 typedef struct  s_statistics {
     struct timeval  begin_date;         // Start time
