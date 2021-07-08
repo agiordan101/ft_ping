@@ -8,9 +8,13 @@
 #include <signal.h>
 #include <netdb.h>
 
+#include <sys/uio.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+#define MSGRECV_LEN 128
+#define METADATA_LEN 128
 
 // struct hostent {
 //     char  *h_name;            /* official name of host */
@@ -35,7 +39,23 @@
 //                 char *option_value,
 //                 int option_length)
 
-typedef struct  s_statistics {
+typedef struct          s_senddata
+{
+    struct sockaddr_in  sockaddr;
+    char                *buff;
+    ssize_t             msgsend_len;
+}                       t_senddata;
+
+typedef struct      s_recvdata
+{
+    char            *msg_recv;
+    char            *metadata;
+    struct iovec    msg_iov;
+    struct msghdr   msghdr;
+    ssize_t         msgrecv_len;
+}                   t_recvdata;
+
+typedef struct      s_statistics {
     struct timeval  begin_date;         // Start time
     int             p_sent;             // Number of packets sent
     int             p_received;         // Number of packets received
@@ -45,7 +65,7 @@ typedef struct  s_statistics {
     float           rtt_max;            // ?
     float           rtt_sum;            // ?
     float           rtt_mdev;           // ?
-}               t_statistics;
+}                   t_statistics;
 
 /*
 Implementation

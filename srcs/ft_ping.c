@@ -4,7 +4,7 @@ static char     *hostname = NULL;
 static bool     pinging_loop = true;
 t_statistics    stats = (t_statistics){};
 
-struct timeval      get_time()
+struct timeval  get_time()
 {
     struct timeval  time;
     int     ret;
@@ -17,7 +17,7 @@ struct timeval      get_time()
     return time;
 }
 
-void    SIGINT_handler()
+void            SIGINT_handler()
 {
     struct timeval end_date = get_time();
     // printf("ctrlc s: %lu\n", (unsigned long)stats.begin_date.tv_sec);
@@ -33,9 +33,10 @@ void    SIGINT_handler()
     pinging_loop = false;
 }
 
-int     open_socket()
+int             open_socket()
 {
-    int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_ICMP);
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    // int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_ICMP);
     // int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
 
     if (sockfd < 0)
@@ -48,13 +49,12 @@ int     open_socket()
     return sockfd;
 }
 
-int     pinging(struct in_addr addr, const char *ipv4)
+int             pinging(struct in_addr addr, const char *ipv4)
 {
-    int                 sockfd;
-    char                *buff;
-    int                 send_ret;
-    struct sockaddr_in  sockaddr;
-    int                 ret;
+    int         sockfd;
+    t_senddata  sd;
+    t_recvdata  rd;
+    int         ret;
 
     // while (pinging_loop)
     if (pinging_loop)
@@ -66,16 +66,15 @@ int     pinging(struct in_addr addr, const char *ipv4)
 
         // Set max hops socket can makes
         int ttl_hops = 100;
-        setsockopt(sockfd, SOL_SOCKET, IP_TTL, &ttl_hops, sizeof(ttl_hops));
+        if (setsockopt(sockfd, SOL_SOCKET, IP_TTL, &ttl_hops, sizeof(ttl_hops)) == -1)
+            perror(NULL), exit(0);
 
         // Set receive timeout
         struct timeval rcv_timeout = {10, 0};
-        setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &rcv_timeout, sizeof(rcv_timeout));
+        if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &rcv_timeout, sizeof(rcv_timeout)) == -1)
+            perror(NULL), exit(0);
 
-        // verifier le retour des setsockopt
-        // Choisir entre IPPROTO_ICMP et IPPROTO_RAW
-
-        sockaddr = (struct sockaddr_in){AF_INET, 42, addr, {0}}; //htons is prohibited
+        sd.sockaddr = (struct sockaddr_in){AF_INET, 42, addr, {0}}; //htons is prohibited
 
         // sockaddr = (struct sockaddr_in){AF_INET, 42, (struct in_addr){0}, {0x0}}; //htons is prohibited
         // if ((ret = inet_pton(AF_INET, ipv4, &sockaddr.sin_addr)) == -1) // Convert IPv4 text address to struct in_addr
@@ -85,11 +84,26 @@ int     pinging(struct in_addr addr, const char *ipv4)
         // printf("sockaddr: %d / %d / %d / >%s<\n\n", sockaddr.sin_family, sockaddr.sin_port, sockaddr.sin_addr.s_addr, sockaddr.sin_zero);
         // exit(0);
 
-        buff = "ping?";
-        send_ret = sendto(sockfd, buff, sizeof(buff), 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
+        sd.buff = "ping";
+        printf("Buffer: %s\n", sd.buff);
+        sd.msgsend_len = sendto(sockfd, sd.buff, 4, 0, (struct sockaddr *)&sd.sockaddr, sizeof(sd.sockaddr));
 
-        printf("send_ret: %d\n", send_ret);
-        if (send_ret == -1)
+        printf("msgsend_len: %ld\n", sd.msgsend_len);
+        if (sd.msgsend_len == -1)
+            perror(NULL), exit(0);
+
+        rd.msg_recv = calloc(1, MSGRECV_LEN);
+        rd.metadata = calloc(1, METADATA_LEN);
+        rd.msg_iov = (struct iovec){&rd.msg_recv, MSGRECV_LEN};
+        rd.msghdr = (struct msghdr){
+            "PING", 4,
+            &rd.msg_iov, 1,
+            &rd.metadata, METADATA_LEN,
+            0
+        };
+        rd.msgrecv_len = recvmsg(sockfd, &rd.msghdr, 0);
+        printf("msgrecv_len: %ld\n", rd.msgrecv_len);
+        if (rd.msgrecv_len == -1)
             perror(NULL), exit(0);
 
         close(sockfd);
@@ -99,7 +113,7 @@ int     pinging(struct in_addr addr, const char *ipv4)
     return 0;
 }
 
-int     main(int argc, char **argv)
+int             main(int argc, char **argv)
 {
     // char    *ret;
     if (argc < 2)
@@ -114,7 +128,7 @@ int     main(int argc, char **argv)
     }
 
     printf("FT_PING %s\n", hostname);
-    
+
     // When CTRL+C is pressed, SIGINT_handler() is called
     signal(SIGINT, SIGINT_handler);
 
