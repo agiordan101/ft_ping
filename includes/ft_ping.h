@@ -1,59 +1,46 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <errno.h>
-
-#include <signal.h>
 #include <netdb.h>
+#include <signal.h>
 
 #include <sys/uio.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+
+#include <linux/icmp.h> // Need both
+#include <netinet/ip.h>
+// #include <netinet/icmp.h>
+
 #include <arpa/inet.h>
 
-#define MSGRECV_LEN 128
-#define METADATA_LEN 128
+#define PKTSIZE         84
+#define PINGMSG         "pingpong?"
+#define PINGMSG_LEN     (sizeof(PINGMSG))
 
-// struct hostent {
-//     char  *h_name;            /* official name of host */
-//     char **h_aliases;         /* alias list */
-//     int    h_addrtype;        /* host address type */
-//     int    h_length;          /* length of address */
-//     char **h_addr_list;       /* list of addresses */
-// }
+# define TTL            64
 
-// ssize_t sendto(
-//     int sockfd,
-//     const void *buf,
-//     size_t len,
-//     int flags,
-//     const struct sockaddr *dest_addr,
-//     socklen_t addrlen
-// );
+// #define IPSIZE          sizeof(struct ip)
+// #define ICMPSIZE        sizeof(struct icmp)
+#define IPHDRSIZE       sizeof(struct iphdr)
+#define ICMPHDRSIZE     sizeof(struct icmphdr)
 
-// int setsockopt(int socket_descriptor,
-//                 int level,
-//                 int option_name,
-//                 char *option_value,
-//                 int option_length)
+#define MSGRECV_LEN     128
+#define METADATA_LEN    128
+#define SKTOPT_LVL      SOL_SOCKET
+// #define SKTOPT_LVL         SOL_RAW
 
-typedef struct          s_senddata
+typedef struct      s_pkt
 {
-    struct sockaddr_in  sockaddr;
-    char                *buff;
-    ssize_t             msgsend_len;
-}                       t_senddata;
-
-typedef struct      s_recvdata
-{
-    char            *msg_recv;
-    char            *metadata;
-    struct iovec    msg_iov;
-    struct msghdr   msghdr;
-    ssize_t         msgrecv_len;
-}                   t_recvdata;
+	char			*buff;
+	struct iphdr    *iphdr;
+	struct icmphdr  *icmphdr;
+	// struct ip       *ip;
+	// struct icmp     *icmp;
+}				    t_pkt;
 
 typedef struct      s_statistics {
     struct timeval  begin_date;         // Start time
@@ -66,6 +53,12 @@ typedef struct      s_statistics {
     float           rtt_sum;            // ?
     float           rtt_mdev;           // ?
 }                   t_statistics;
+
+int     create_skt();
+void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt);
+void    recv_pkt(int sktfd, t_pkt *pkt);
+
+struct timeval  get_time();
 
 /*
 Implementation

@@ -1,21 +1,14 @@
 #include "ft_ping.h"
 
+/*
+
+    Utilisation autorisé d'une globale seulement / static?
+    Utiliser extern 
+
+*/
 static char     *hostname = NULL;
 static bool     pinging_loop = true;
 t_statistics    stats = (t_statistics){};
-
-struct timeval  get_time()
-{
-    struct timeval  time;
-    int     ret;
-
-    if ((ret = gettimeofday(&time, NULL)))
-    {
-        printf("Unable to get time, gettimeofday() ret: %d\n", ret);
-        exit(0);
-    }
-    return time;
-}
 
 void            SIGINT_handler()
 {
@@ -33,85 +26,43 @@ void            SIGINT_handler()
     pinging_loop = false;
 }
 
-int             open_socket()
-{
-    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    // int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_ICMP);
-    // int sockfd = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW);
-
-    if (sockfd < 0)
-    {
-        printf("[ERROR] Socket can't be created: \n");
-        perror(NULL);
-        exit(0);
-    }
-    // printf("socket fd: %d\n", sockfd);
-    return sockfd;
-}
-
 int             pinging(struct in_addr addr, const char *ipv4)
 {
-    int         sockfd;
-    t_senddata  sd;
-    t_recvdata  rd;
-    int         ret;
+    t_pkt       pkt;
+    int         sktfd;
+
+    pkt.buff = malloc(PKTSIZE);
+    pkt.iphdr = (struct iphdr *)pkt.buff;
+    pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDRSIZE);
+
+    // printf("%p\t%p\t%p\n", pkt.buff, pkt.ip, pkt.icmp);
+
+    printf("Sizeof structs IP / ICMP: %ld / %ld\n", IPHDRSIZE, ICMPHDRSIZE);
+
+    // t_pkt pkt;
+    // printf("iphdr size: %ld\n", sizeof(pkt.iphdr));
+    // printf("ip size: %ld\n", sizeof(pkt.ip));
+    // printf("icmphdr size: %ld\n", sizeof(pkt.icmphdr));
+    // printf("icmp size: %ld\n", sizeof(pkt.icmp));
+    // exit(0);
 
     // while (pinging_loop)
     if (pinging_loop)
     {
         printf("pinging ...\n");
 
-        sockfd = open_socket(hostname);
-        printf("sockfd: %d\n\n", sockfd);
+        sktfd = create_skt(hostname);
+ 
+        send_pkt(sktfd, addr, &pkt);
+        recv_pkt(sktfd, &pkt);
 
-        // Set max hops socket can makes
-        int ttl_hops = 100;
-        if (setsockopt(sockfd, SOL_SOCKET, IP_TTL, &ttl_hops, sizeof(ttl_hops)) == -1)
-            perror(NULL), exit(0);
-
-        // Set receive timeout
-        struct timeval rcv_timeout = {10, 0};
-        if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &rcv_timeout, sizeof(rcv_timeout)) == -1)
-            perror(NULL), exit(0);
-
-        sd.sockaddr = (struct sockaddr_in){AF_INET, 42, addr, {0}}; //htons is prohibited
-
-        // sockaddr = (struct sockaddr_in){AF_INET, 42, (struct in_addr){0}, {0x0}}; //htons is prohibited
-        // if ((ret = inet_pton(AF_INET, ipv4, &sockaddr.sin_addr)) == -1) // Convert IPv4 text address to struct in_addr
-        //     perror(NULL), exit(0);
-
-        // printf("inet_pton return: %d\n", ret);
-        // printf("sockaddr: %d / %d / %d / >%s<\n\n", sockaddr.sin_family, sockaddr.sin_port, sockaddr.sin_addr.s_addr, sockaddr.sin_zero);
-        // exit(0);
-
-        sd.buff = "ping";
-        printf("Buffer: %s\n", sd.buff);
-        sd.msgsend_len = sendto(sockfd, sd.buff, 4, 0, (struct sockaddr *)&sd.sockaddr, sizeof(sd.sockaddr));
-
-        printf("msgsend_len: %ld\n", sd.msgsend_len);
-        if (sd.msgsend_len == -1)
-            perror(NULL), exit(0);
-
-        rd.msg_recv = calloc(1, MSGRECV_LEN);
-        rd.metadata = calloc(1, METADATA_LEN);
-        rd.msg_iov = (struct iovec){&rd.msg_recv, MSGRECV_LEN};
-        rd.msghdr = (struct msghdr){
-            "PING", 4,
-            &rd.msg_iov, 1,
-            &rd.metadata, METADATA_LEN,
-            0
-        };
-        rd.msgrecv_len = recvmsg(sockfd, &rd.msghdr, 0);
-        printf("msgrecv_len: %ld\n", rd.msgrecv_len);
-        if (rd.msgrecv_len == -1)
-            perror(NULL), exit(0);
-
-        close(sockfd);
+        close(sktfd);
     }
     (void)ipv4;
-    (void)ret;
     return 0;
 }
+
+// void            init()
 
 int             main(int argc, char **argv)
 {
@@ -137,11 +88,11 @@ int             main(int argc, char **argv)
     
     // Make in_addr struct
     struct in_addr  addr;
-    memcpy(&addr.s_addr, dns_lookup->h_addr, dns_lookup->h_length); // Copy the binary address in struct in_addr
+    memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length); // Copy the binary address in struct in_addr
 
     // Make IPv4 string
     char    *ipv4 = malloc(INET_ADDRSTRLEN);
-    inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);               // Transform struct in_addr address to text
+    inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);               // Transform struct in_addr address to text / Transform struct to IP address
 
     printf("h_name: %s / addrs: %p / h_addrtype: %d=?=%d / h_length: %d\n", dns_lookup->h_name, dns_lookup->h_addr_list, dns_lookup->h_addrtype, AF_INET, dns_lookup->h_length);
     printf("IP serveur ntop: >%s<\n\n", ipv4);

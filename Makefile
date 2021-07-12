@@ -12,6 +12,10 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c	\
+				socket.c \
+				send.c \
+				recv.c \
+				utils.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
