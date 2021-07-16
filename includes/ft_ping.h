@@ -28,10 +28,15 @@
 #define IPHDRSIZE       sizeof(struct iphdr)
 #define ICMPHDRSIZE     sizeof(struct icmphdr)
 
+#define RECVMSG_FLAGS   MSG_DONTWAIT
+// #define RECVMSG_FLAGS   MSG_WAITALL
+
 #define MSGRECV_LEN     128
-#define METADATA_LEN    128
-#define SKTOPT_LVL      SOL_SOCKET
+// #define METADATA_LEN    128
+#define SKTOPT_LVL      IPPROTO_IP
+// #define SKTOPT_LVL      SOL_SOCKET
 // #define SKTOPT_LVL         SOL_RAW
+// #define SKTOPT_LVL         SOL_IP
 
 typedef struct      s_pkt
 {
@@ -56,7 +61,11 @@ typedef struct      s_statistics {
 
 int     create_skt();
 void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt);
+// void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt, struct sockaddr_in *ai_res);
 void    recv_pkt(int sktfd, t_pkt *pkt);
+
+unsigned short	checksum(unsigned short *data, int len);
+// struct sockaddr_in  *get_addrinfo(char *hostname);
 
 struct timeval  get_time();
 

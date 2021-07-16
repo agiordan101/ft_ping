@@ -46,35 +46,56 @@ void hexDump(char *desc, void *addr, int len)
     printf("  %s\n", buff);
 }
 
+
+
+// void	init_header(void)
+// {
+// 	t_res	*res;
+
+// 	res = &g_params->response;
+// 	ft_bzero((void *)g_params->pckt.buf, PACKET_PING_SIZE);
+// 	ft_bzero(res, sizeof(t_res));
+// 	res->iov->iov_base = (void *)g_params->pckt.buf;
+// 	res->iov->iov_len = sizeof(g_params->pckt.buf);
+// 	res->msg.msg_iov = res->iov;
+// 	res->msg.msg_iovlen = 1;
+// 	res->msg.msg_name = NULL;
+// 	res->msg.msg_namelen = 0;
+// 	res->msg.msg_flags = MSG_DONTWAIT;
+// }
+
 void    recv_pkt(int sktfd, t_pkt *pkt)
 {
-    // char            *msg_recv;
-    char            *metadata;
+    char            *msg_recv;
+    // char            *metadata;
     struct iovec    msg_iov;
     struct msghdr   msghdr;
     ssize_t         msgrecv_len;
  
-    // msg_recv = calloc(1, MSGRECV_LEN);
-    metadata = calloc(1, METADATA_LEN);
-    // msg_iov = (struct iovec){&msg_recv, MSGRECV_LEN};
+    msg_recv = calloc(1, MSGRECV_LEN);
+    // metadata = calloc(1, METADATA_LEN);
 
-    msg_iov = (struct iovec){pkt->buff, sizeof(pkt->buff)};
+    // msg_iov = (struct iovec){msg_recv, sizeof(msg_recv)};
+    msg_iov = (struct iovec){pkt->buff, sizeof(pkt->buff)}; // 'E' char appear in msghdr.msg_iov[0].iov_base response
     
     msghdr = (struct msghdr){
-        "ft_ping", 7,
+        NULL, 0,
+        // "ft_ping", 7,
         &msg_iov, 1,
-        &metadata, METADATA_LEN,
-        0
+        NULL, 0,
+        // &metadata, METADATA_LEN,
+        RECVMSG_FLAGS
     };
 
-    sleep(1);
-    //ret = -1 => EAGAIN => Nothing to receive
-    msgrecv_len = recvmsg(sktfd, &msghdr, MSG_WAITALL);
-    // msgrecv_len = recvmsg(sktfd, &msghdr, MSG_DONTWAIT);
-    printf("errno: %d\n", errno);
-    printf("msgrecv_len: %ld\n\n", msgrecv_len);
+    // ret = -1 => EAGAIN => Nothing to receive
+    msgrecv_len = recvmsg(sktfd, &msghdr, RECVMSG_FLAGS);
 
-    // printf("msg_control:\n");
+    printf("msgrecv_len: %ld\n", msgrecv_len);
+    printf("errno recv: %d\n", errno);
+
+    printf("msg_recv: >%s<\n", msg_recv);
+    printf("pkt->buff: >%s<\n", pkt->buff);
+    printf("msghdr flags: >%d< !?= >%d<\n", msghdr.msg_flags, RECVMSG_FLAGS);
     // int ret = write(1, msghdr.msg_control, msghdr.msg_controllen);
     // (void)ret;
 
@@ -90,4 +111,6 @@ void    recv_pkt(int sktfd, t_pkt *pkt)
     }
     if (msgrecv_len == -1)
         perror(NULL), exit(1);
+    printf("\n");
+    (void)pkt;
 }

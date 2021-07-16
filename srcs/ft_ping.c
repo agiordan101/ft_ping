@@ -27,6 +27,7 @@ void            SIGINT_handler()
 }
 
 int             pinging(struct in_addr addr, const char *ipv4)
+// int             pinging(struct in_addr addr, const char *ipv4, struct sockaddr_in *ai_res)
 {
     t_pkt       pkt;
     int         sktfd;
@@ -46,18 +47,19 @@ int             pinging(struct in_addr addr, const char *ipv4)
     // printf("icmp size: %ld\n", sizeof(pkt.icmp));
     // exit(0);
 
-    // while (pinging_loop)
-    if (pinging_loop)
+    sktfd = create_skt(hostname);
+    while (pinging_loop)
+    // if (pinging_loop)
     {
         printf("pinging ...\n");
 
-        sktfd = create_skt(hostname);
  
         send_pkt(sktfd, addr, &pkt);
+        // send_pkt(sktfd, addr, &pkt, ai_res);
         recv_pkt(sktfd, &pkt);
 
-        close(sktfd);
     }
+    close(sktfd);
     (void)ipv4;
     return 0;
 }
@@ -90,6 +92,12 @@ int             main(int argc, char **argv)
     struct in_addr  addr;
     memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length); // Copy the binary address in struct in_addr
 
+    //-------------------------
+    // struct sockaddr_in *ai_res = get_addrinfo(hostname);
+    //-------------------------
+
+
+
     // Make IPv4 string
     char    *ipv4 = malloc(INET_ADDRSTRLEN);
     inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);               // Transform struct in_addr address to text / Transform struct to IP address
@@ -98,6 +106,7 @@ int             main(int argc, char **argv)
     printf("IP serveur ntop: >%s<\n\n", ipv4);
 
     pinging(addr, ipv4);
+    // pinging(addr, ipv4, ai_res);
 
     return 0;
 }
