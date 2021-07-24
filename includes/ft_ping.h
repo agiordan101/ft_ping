@@ -33,7 +33,8 @@
 
 #define MSGRECV_LEN     128
 // #define METADATA_LEN    128
-#define SKTOPT_LVL      IPPROTO_IP
+#define SKTOPT_LVL      IPPROTO_ICMP
+// #define SKTOPT_LVL      IPPROTO_IP
 // #define SKTOPT_LVL      SOL_SOCKET
 // #define SKTOPT_LVL         SOL_RAW
 // #define SKTOPT_LVL         SOL_IP

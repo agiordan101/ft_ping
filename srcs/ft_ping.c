@@ -24,6 +24,7 @@ void            SIGINT_handler()
     printf("%d packets transmitted, %d received, %.3f%% packet loss, time %lds\n", stats.p_sent, stats.p_received, stats.p_sent ? (100 * stats.p_received / (float)stats.p_sent) : 0., end_date.tv_sec - stats.begin_date.tv_sec);
     printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", stats.rtt_min, stats.rtt_n ? (stats.rtt_sum / stats.rtt_n) : 0., stats.rtt_max, stats.rtt_mdev);
     pinging_loop = false;
+    exit(0); // Not the right behavior
 }
 
 int             pinging(struct in_addr addr, const char *ipv4)
@@ -87,10 +88,10 @@ int             main(int argc, char **argv)
 
     // Get hostname info
     struct hostent  *dns_lookup = gethostbyname(hostname);
-    
-    // Make in_addr struct
+
+    // Copy the binary address into struct in_addr
     struct in_addr  addr;
-    memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length); // Copy the binary address in struct in_addr
+    memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length);
 
     //-------------------------
     // struct sockaddr_in *ai_res = get_addrinfo(hostname);
@@ -100,7 +101,9 @@ int             main(int argc, char **argv)
 
     // Make IPv4 string
     char    *ipv4 = malloc(INET_ADDRSTRLEN);
-    inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);               // Transform struct in_addr address to text / Transform struct to IP address
+
+    // Transform struct in_addr to IP address text --- addr to ipv4
+    inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);
 
     printf("h_name: %s / addrs: %p / h_addrtype: %d=?=%d / h_length: %d\n", dns_lookup->h_name, dns_lookup->h_addr_list, dns_lookup->h_addrtype, AF_INET, dns_lookup->h_length);
     printf("IP serveur ntop: >%s<\n\n", ipv4);

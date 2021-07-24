@@ -66,51 +66,72 @@ void hexDump(char *desc, void *addr, int len)
 
 void    recv_pkt(int sktfd, t_pkt *pkt)
 {
-    char            *msg_recv;
-    // char            *metadata;
-    struct iovec    msg_iov;
-    struct msghdr   msghdr;
-    ssize_t         msgrecv_len;
- 
-    msg_recv = calloc(1, MSGRECV_LEN);
-    // metadata = calloc(1, METADATA_LEN);
+    /*
+        Test reception google ECHO REPLY 
+    */
+	printf("recvfrom() ...\n");
 
-    // msg_iov = (struct iovec){msg_recv, sizeof(msg_recv)};
-    msg_iov = (struct iovec){pkt->buff, sizeof(pkt->buff)}; // 'E' char appear in msghdr.msg_iov[0].iov_base response
-    
-    msghdr = (struct msghdr){
-        NULL, 0,
-        // "ft_ping", 7,
-        &msg_iov, 1,
-        NULL, 0,
-        // &metadata, METADATA_LEN,
-        RECVMSG_FLAGS
-    };
+	// received echoed data back
+    int len = 100;
+	char buffer[len];
+	recvfrom(sktfd, buffer, len, 0, NULL, NULL);
+	buffer[len] = '\0';
+	printf("recieved: '%s'\n", buffer);
 
-    // ret = -1 => EAGAIN => Nothing to receive
-    msgrecv_len = recvmsg(sktfd, &msghdr, RECVMSG_FLAGS);
-
-    printf("msgrecv_len: %ld\n", msgrecv_len);
-    printf("errno recv: %d\n", errno);
-
-    printf("msg_recv: >%s<\n", msg_recv);
-    printf("pkt->buff: >%s<\n", pkt->buff);
-    printf("msghdr flags: >%d< !?= >%d<\n", msghdr.msg_flags, RECVMSG_FLAGS);
-    // int ret = write(1, msghdr.msg_control, msghdr.msg_controllen);
-    // (void)ret;
-
-    int i = 0;
-    while (i < (int)msghdr.msg_iovlen)
-    {
-        char buff[1024];
-        bzero(buff, sizeof(buff));
-        strncpy(buff, msghdr.msg_iov[i].iov_base, msghdr.msg_iov[i].iov_len);
-        printf("msghdr.msg_iov[%d].iov_base: >%s<\n", i, buff);
-
-        i++;
-    }
-    if (msgrecv_len == -1)
-        perror(NULL), exit(1);
-    printf("\n");
     (void)pkt;
 }
+
+// void    recv_pkt(int sktfd, t_pkt *pkt)
+// {
+//     char            *msg_recv;
+//     // char            *metadata;
+//     struct iovec    msg_iov;
+//     struct msghdr   msghdr;
+//     ssize_t         msgrecv_len = -1;
+ 
+//     msg_recv = calloc(1, MSGRECV_LEN);
+//     // metadata = calloc(1, METADATA_LEN);
+
+//     while (msgrecv_len == -1)
+//     {
+
+//         // msg_iov = (struct iovec){msg_recv, sizeof(msg_recv)};
+//         msg_iov = (struct iovec){pkt->buff, sizeof(pkt->buff)}; // 'E' char appear in msghdr.msg_iov[0].iov_base response
+
+//         msghdr = (struct msghdr){
+//             NULL, 0,
+//             // "ft_ping", 7,
+//             &msg_iov, 1,
+//             NULL, 0,
+//             // &metadata, METADATA_LEN,
+//             RECVMSG_FLAGS
+//         };
+
+//         // ret = -1 => EAGAIN => Nothing to receive
+//         msgrecv_len = recvmsg(sktfd, &msghdr, RECVMSG_FLAGS);
+
+//         printf("msgrecv_len: %ld\n", msgrecv_len);
+//     }
+//     printf("errno recv: %d\n", errno);
+
+//     printf("msg_recv: >%s<\n", msg_recv);
+//     printf("pkt->buff: >%s<\n", pkt->buff);
+//     printf("msghdr flags: >%d< =?= >%d<\n", msghdr.msg_flags, RECVMSG_FLAGS);
+//     // int ret = write(1, msghdr.msg_control, msghdr.msg_controllen);
+//     // (void)ret;
+
+//     int i = 0;
+//     while (i < (int)msghdr.msg_iovlen)
+//     {
+//         char buff[1024];
+//         bzero(buff, sizeof(buff));
+//         strncpy(buff, msghdr.msg_iov[i].iov_base, msghdr.msg_iov[i].iov_len);
+//         printf("msghdr.msg_iov[%d].iov_base: >%s<\n", i, buff);
+
+//         i++;
+//     }
+//     if (msgrecv_len == -1)
+//         perror(NULL), exit(1);
+//     printf("\n");
+//     (void)pkt;
+// }
