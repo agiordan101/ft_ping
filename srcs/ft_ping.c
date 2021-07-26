@@ -32,14 +32,16 @@ int             pinging(struct in_addr addr, const char *ipv4)
 {
     t_pkt       pkt;
     int         sktfd;
+    int         ret = -1;
 
     pkt.buff = malloc(PKTSIZE);
     pkt.iphdr = (struct iphdr *)pkt.buff;
-    pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDRSIZE);
+    pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDR_SIZE);
+    pkt.payload = (char *)(pkt.icmphdr + ICMPHDR_SIZE);
 
     // printf("%p\t%p\t%p\n", pkt.buff, pkt.ip, pkt.icmp);
 
-    printf("Sizeof structs IP / ICMP: %ld / %ld\n", IPHDRSIZE, ICMPHDRSIZE);
+    printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
 
     // t_pkt pkt;
     // printf("iphdr size: %ld\n", sizeof(pkt.iphdr));
@@ -49,16 +51,16 @@ int             pinging(struct in_addr addr, const char *ipv4)
     // exit(0);
 
     sktfd = create_skt(hostname);
-    while (pinging_loop)
-    // if (pinging_loop)
+    // while (pinging_loop)
+    if (pinging_loop)
     {
-        printf("pinging ...\n");
-
+        printf("\nPing ...\n");
  
-        send_pkt(sktfd, addr, &pkt);
-        // send_pkt(sktfd, addr, &pkt, ai_res);
-        recv_pkt(sktfd, &pkt);
+        send_pkt(sktfd, addr, &pkt, inet_addr(ipv4));
+        while (ret == -1)
+            ret = recv_pkt(sktfd, &pkt);
 
+        printf("End ping.\n");
     }
     close(sktfd);
     (void)ipv4;

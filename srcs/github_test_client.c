@@ -11,8 +11,8 @@
 
 # define TTL            64
 #define PKTSIZE         84
-#define IPHDRSIZE       sizeof(struct iphdr)
-#define ICMPHDRSIZE     sizeof(struct icmphdr)
+#define IPHDR_SIZE       sizeof(struct iphdr)
+#define ICMPHDR_SIZE     sizeof(struct icmphdr)
 
 typedef struct      s_pkt
 {
@@ -50,12 +50,12 @@ void	ft_send(int sockfd, struct sockaddr_in destaddr)
 	int                 msgsend_len;
     // struct sockaddr_in  destaddr = (struct sockaddr_in){AF_INET, htons(1024), addr, {0}}; //htons is prohibited by the subject;
 	
-    printf("Sizeof structs IP / ICMP: %ld / %ld\n", IPHDRSIZE, ICMPHDRSIZE);
+    printf("Sizeof structs IP / ICMP: %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE);
     printf("Buff size: %d\n", PKTSIZE);
 	
     pkt.buff = malloc(PKTSIZE);
     pkt.iphdr = (struct iphdr *)pkt.buff;
-    pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDRSIZE);
+    pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDR_SIZE);
 	bzero((void *)pkt.buff, PKTSIZE);
 
 	pkt.iphdr->version = 4;
