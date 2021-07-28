@@ -14,8 +14,57 @@
 // 	return (struct sockaddr_in *)result->ai_addr;
 // }
 
+void			print_msghdr(struct msghdr *msghdr)
+{
+	char	buff[1024];
+	int		rw = -1;
+
+	printf("msghdr: %p\n", msghdr);
+
+	// msg_name
+	bzero(buff, sizeof(buff));
+	memcpy(buff, msghdr->msg_name, msghdr->msg_namelen);
+    printf("msghdr->msg_name (len=%d): >%s<\n", msghdr->msg_namelen, buff);
+    // printf("msghdr->msg_name (len=%d): >\n", msghdr->msg_namelen);
+	// rw = write(1, (char *)msghdr->msg_name, msghdr->msg_namelen);
+	// printf("<\n");
+
+	// msg_iov
+    printf("msghdr->msg_iovlen: %ld\n", msghdr->msg_iovlen);
+    int i = 0;
+    while (i < (int)msghdr->msg_iovlen)
+    {
+        bzero(buff, sizeof(buff));
+        memcpy(buff, msghdr->msg_iov[i].iov_base, msghdr->msg_iov[i].iov_len);
+        printf(" - msghdr->msgiov[%d].iov_base (len=%d): >%s<\n", i, (int)msghdr->msg_iov[i].iov_len, buff);
+
+		// printf(" - msghdr->msg_iov[%d].iov_base (len=%ld): >\n", i, msghdr->msg_iov[i].iov_len);
+		// rw = write(1, msghdr->msg_iov[i].iov_base, msghdr->msg_iov[i].iov_len);
+		// printf("<\n");
+
+		i++;
+    }
+
+	// msg_control
+	bzero(buff, sizeof(buff));
+	memcpy(buff, msghdr->msg_control, msghdr->msg_controllen);
+    printf("msghdr.msg_control (len=%ld): >%s<\n", msghdr->msg_controllen, buff);
+    // printf("msghdr->msg_control (len=%ld): >\n", msghdr->msg_controllen);
+	// rw = write(1, msghdr->msg_control, msghdr->msg_controllen);
+	// printf("<\n");
+
+	printf("msghdr->msg_flags: %d\n", msghdr->msg_flags);
+    printf("\n");
+	(void)rw;
+	(void)buff;
+}
+
+
 void			print_iphdr(struct iphdr *iphdr)
 {
+    char			*ipv4 = malloc(INET_ADDRSTRLEN);
+	struct in_addr	addr;
+
 	printf("iphdr: %p\n", iphdr);
 	printf("iphdr->version: %d\n", iphdr->version);
 	printf("iphdr->ihl: %d\n", iphdr->ihl);
@@ -25,8 +74,14 @@ void			print_iphdr(struct iphdr *iphdr)
 	printf("iphdr->frag_off: %d\n", iphdr->frag_off);
 	printf("iphdr->ttl: %d\n", iphdr->ttl);
 	printf("iphdr->protocol: %d\n", iphdr->protocol);
-	printf("iphdr->saddr: %d\n", iphdr->saddr);
-	printf("iphdr->daddr: %d\n", iphdr->daddr);
+
+	addr = (struct in_addr){iphdr->saddr};
+	inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);
+	printf("iphdr->saddr: %s\n", ipv4);
+
+	addr = (struct in_addr){iphdr->daddr};
+	inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);
+	printf("iphdr->daddr: %s\n", ipv4);
     printf("\n");
 }
 

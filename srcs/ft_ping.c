@@ -42,7 +42,7 @@ int             pinging(struct in_addr addr, const char *ipv4)
     // printf("%p\t%p\t%p\n", pkt.buff, pkt.ip, pkt.icmp);
 
     printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
-
+    printf("Sizeof MSGHDR: %ld\n", sizeof(struct msghdr));
     // t_pkt pkt;
     // printf("iphdr size: %ld\n", sizeof(pkt.iphdr));
     // printf("ip size: %ld\n", sizeof(pkt.ip));

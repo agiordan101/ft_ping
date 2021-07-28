@@ -67,5 +67,5 @@ unsigned short	checksum(unsigned short *data, int len);
 
 struct timeval  get_time();
 void			print_iphdr(struct iphdr *iphdr);
+void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
-
