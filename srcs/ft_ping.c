@@ -7,9 +7,8 @@
     FQDN ???
 
 */
-static char     *hostname = NULL;
-static bool     pinging_loop = true;
-t_statistics    stats = (t_statistics){};
+
+extern t_gdata  data;
 
 void            SIGINT_handler()
 {
@@ -38,18 +37,10 @@ int             pinging(struct in_addr addr, const char *ipv4)
     pkt.buff = malloc(PKTSIZE);
     pkt.iphdr = (struct iphdr *)pkt.buff;
     pkt.icmphdr = (struct icmphdr *)(pkt.iphdr + IPHDR_SIZE);
-    pkt.payload = (char *)(pkt.icmphdr + ICMPHDR_SIZE);
-
-    // printf("%p\t%p\t%p\n", pkt.buff, pkt.ip, pkt.icmp);
+    // pkt.payload = (char *)(pkt.icmphdr + ICMPHDR_SIZE);
 
     printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
-    printf("Sizeof MSGHDR: %ld\n", sizeof(struct msghdr));
-    // t_pkt pkt;
-    // printf("iphdr size: %ld\n", sizeof(pkt.iphdr));
-    // printf("ip size: %ld\n", sizeof(pkt.ip));
-    // printf("icmphdr size: %ld\n", sizeof(pkt.icmphdr));
-    // printf("icmp size: %ld\n", sizeof(pkt.icmp));
-    // exit(0);
+
 
     sktfd = create_skt(hostname);
     // while (pinging_loop)
@@ -80,8 +71,8 @@ int             main(int argc, char **argv)
     }
     else
     {
-        hostname = argv[1];
-        stats.begin_date = get_time();
+        data.hostname = argv[1];
+        data.stats.begin_date = get_time();
     }
 
     printf("FT_PING %s\n", hostname);

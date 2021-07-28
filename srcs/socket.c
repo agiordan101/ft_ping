@@ -3,7 +3,6 @@
 int     create_skt()
 {
     int sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    // int sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 
     if (sktfd < 0)
     {
@@ -14,8 +13,7 @@ int     create_skt()
  
     // Set max hops socket can makes
     int ttl_hops = TTL;
-    // if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
-    if (setsockopt(sktfd, 0, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
+    if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
         perror(NULL), exit(1);
 
     // Set receive timeout

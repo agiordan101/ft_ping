@@ -68,12 +68,6 @@ int     recv_pkt(int sktfd)
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     print_icmphdr(icmphdr);
 
-    // char *payload = (char *)(icmphdr + ICMPHDR_SIZE);
-    // printf("payload: >%s<\n", payload);
-    // printf("payload: >");
-    // int mabite = write(1, payload, PAYLOAD_SIZE);
-    // (void)mabite;
-    // printf("<\n");
     printf("\n");
     return recvmsg_len;
 }

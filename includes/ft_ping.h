@@ -45,6 +45,13 @@ typedef struct      s_pkt
     char            *payload;
 }				    t_pkt;
 
+typedef struct      s_gdata
+{
+    t_statistics    stats;
+    int             pinging_loop;
+    char            *hostname;
+}                   t_gdata;
+
 typedef struct      s_statistics {
     struct timeval  begin_date;         // Start time
     int             p_sent;             // Number of packets sent
