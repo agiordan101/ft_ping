@@ -23,20 +23,5 @@ int     create_skt()
     if (setsockopt(sktfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&rcv_timeout, sizeof(rcv_timeout)) < 0)
         perror(NULL), exit(1);
 
-    int filter = ICMP_ECHOREPLY;
-    if (setsockopt(sktfd, IPPROTO_ICMP, ICMP_FILTER, (char *)&filter, sizeof(filter)) < 0)
-    // if (setsockopt(sktfd, IPPROTO_IP, ICMP_FILTER, (char *)&filter, sizeof(filter)) < 0)
-    // if (setsockopt(sktfd, SOL_SOCKET, ICMP_FILTER, (char *)&filter, sizeof(filter)) < 0)
-        perror(NULL), exit(1);
-
-	// // We shall provide IP headers
-    // int opt_val = 1;
-	// if (setsockopt(sktfd, IPPROTO_IP, IP_HDRINCL, &opt_val, sizeof(int)) < 0)
-    //     perror(NULL), exit(1);
-
-	// // Allow socket to send datagrams to broadcast addresses
-    // if (setsockopt(sktfd, SOL_SOCKET, SO_BROADCAST, &opt_val, sizeof(int)) < 0)
-    //     perror(NULL), exit(1);
-
     return sktfd;
 }

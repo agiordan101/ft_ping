@@ -2,7 +2,6 @@
 
 void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt, unsigned long daddr)
 {
-    int                 msgsend_len;
     struct sockaddr_in  destaddr = (struct sockaddr_in){
         AF_INET,
         1024,
@@ -19,12 +18,12 @@ void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt, unsigned long daddr
 
     print_icmphdr(pkt->icmphdr);
 
-    memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
-    printf("Payload: >%s<\n", pkt->payload);
+    // memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
+    // printf("Payload: >%s<\n", pkt->payload);
 
-    msgsend_len = sendto(
+    int msgsend_len = sendto(
         sktfd,
-        pkt->icmphdr, sizeof(pkt->icmphdr) + PAYLOAD_SIZE,
+        pkt->icmphdr, sizeof(pkt->icmphdr),
         0, // Flags
         (struct sockaddr *)&destaddr, sizeof(destaddr)
     );

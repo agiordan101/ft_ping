@@ -4,6 +4,7 @@
 
     Utilisation autorisé d'une globale seulement / static?
     Utiliser extern 
+    FQDN ???
 
 */
 static char     *hostname = NULL;

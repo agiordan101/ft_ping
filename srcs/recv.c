@@ -33,7 +33,7 @@ int     recv_pkt(int sktfd)
     struct msghdr       msghdr;
     char                namebuff[1024];
     char                recvbuff[PKTSIZE];
-    char                controlbuff[1024];
+    char                controlbuff[METADATA_LEN];
     // struct sockaddr_in  buff;
     struct iovec        msgiov;
     int                 recvmsg_len = -1;
@@ -56,6 +56,8 @@ int     recv_pkt(int sktfd)
 
     printf("recvmsg() ret:   %d\n", recvmsg_len);
     printf("recvmsg() errno: %d\n", errno);
+    if (recvmsg_len == -1)
+        perror(NULL);
     printf("\n");
 
     print_msghdr(&msghdr);
@@ -66,16 +68,12 @@ int     recv_pkt(int sktfd)
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     print_icmphdr(icmphdr);
 
-    char *payload = (char *)(icmphdr + ICMPHDR_SIZE);
+    // char *payload = (char *)(icmphdr + ICMPHDR_SIZE);
     // printf("payload: >%s<\n", payload);
-    printf("payload: >");
-    
-    int mabite = write(1, payload, PAYLOAD_SIZE);
-    (void)mabite;
-    printf("<\n");
-
-    if (recvmsg_len == -1)
-        perror(NULL);
+    // printf("payload: >");
+    // int mabite = write(1, payload, PAYLOAD_SIZE);
+    // (void)mabite;
+    // printf("<\n");
     printf("\n");
     return recvmsg_len;
 }

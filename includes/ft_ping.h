@@ -24,13 +24,12 @@
 #define PAYLOAD_SIZE    sizeof(PAYLOAD)
 #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
 
-# define TTL            128
+# define TTL            60
 
 // #define RECVMSG_FLAGS   MSG_DONTWAIT
 #define RECVMSG_FLAGS   MSG_WAITALL
 #define RECVTIMEOUTMS   1000
 
-#define MSGRECV_LEN     128
 #define METADATA_LEN    420
 // #define SKTOPT_LVL      IPPROTO_ICMP
 // #define SKTOPT_LVL      IPPROTO_IP
