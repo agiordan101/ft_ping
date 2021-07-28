@@ -58,7 +58,7 @@ int             pinging(struct in_addr addr, const char *ipv4)
  
         send_pkt(sktfd, addr, &pkt, inet_addr(ipv4));
         while (ret == -1)
-            ret = recv_pkt(sktfd, &pkt);
+            ret = recv_pkt(sktfd);
 
         printf("End ping.\n");
     }

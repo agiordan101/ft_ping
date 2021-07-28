@@ -60,9 +60,12 @@ typedef struct      s_statistics {
 
 int     create_skt();
 void    send_pkt(int sktfd, struct in_addr addr, t_pkt *pkt, unsigned long daddr);
-int     recv_pkt(int sktfd, t_pkt *pkt);
+int     recv_pkt(int sktfd);
 
 unsigned short	checksum(unsigned short *data, int len);
 // struct sockaddr_in  *get_addrinfo(char *hostname);
 
 struct timeval  get_time();
+void			print_iphdr(struct iphdr *iphdr);
+void			print_icmphdr(struct icmphdr *icmphdr);
+

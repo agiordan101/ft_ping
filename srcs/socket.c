@@ -2,8 +2,6 @@
 
 int     create_skt()
 {
-    //Raw socket - if you use IPPROTO_ICMP, then kernel will fill in the correct ICMP header checksum,
-    //              if IPPROTO_RAW, then it wont
     int sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     // int sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 
@@ -14,11 +12,11 @@ int     create_skt()
     }
     printf("Socket fd: %d\n", sktfd);
  
-    // // Set max hops socket can makes
-    // int ttl_hops = TTL;
-    // // if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
-    // if (setsockopt(sktfd, 0, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
-    //     perror(NULL), exit(1);
+    // Set max hops socket can makes
+    int ttl_hops = TTL;
+    // if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
+    if (setsockopt(sktfd, 0, IP_TTL, (char *)&ttl_hops, sizeof(ttl_hops)) < 0)
+        perror(NULL), exit(1);
 
     // Set receive timeout
     struct timeval rcv_timeout = {(int)RECVTIMEOUTMS / 1000, RECVTIMEOUTMS % 1000};
