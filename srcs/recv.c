@@ -31,9 +31,9 @@
 int     recv_pkt(int sktfd)
 {
     struct msghdr       msghdr;
-    char                namebuff[1024];
+    char                namebuff[BUFF_SIZE];
     char                recvbuff[PKTSIZE];
-    char                controlbuff[METADATA_LEN];
+    char                controlbuff[BUFF_SIZE];
     // struct sockaddr_in  buff;
     struct iovec        msgiov;
     int                 recvmsg_len = -1;
@@ -52,7 +52,7 @@ int     recv_pkt(int sktfd)
     };
 
     // ret = -1 => EAGAIN => Nothing to receive
-    recvmsg_len = recvmsg(sktfd, &msghdr, RECVMSG_FLAGS);
+    recvmsg_len = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
 
     printf("recvmsg() ret:   %d\n", recvmsg_len);
     printf("recvmsg() errno: %d\n", errno);

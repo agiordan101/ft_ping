@@ -14,6 +14,11 @@
 // 	return (struct sockaddr_in *)result->ai_addr;
 // }
 
+float			ft_abs(float x)
+{
+	return x < 0 ? -x : x;
+}
+
 unsigned short	checksum(unsigned short *data, int len)
 {
 	unsigned long	checksum;

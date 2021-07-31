@@ -81,3 +81,22 @@ void			print_icmphdr(struct icmphdr *icmphdr)
     printf("icmphdr->un.gateway: %d\n", icmphdr->un.gateway);
     printf("\n");
 }
+
+void			print_stats()
+{
+    t_statistics    *stats = &gdata.stats;
+
+    printf("--- %s ping statistics ---\n", gdata.hostname);
+    printf("%d packets transmitted, %d received, %.3f%% packet loss, time %lds\n",
+        stats->p_sent,
+        stats->p_received,
+        stats->p_sent ? (100 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0.,
+        gdata.end_time.tv_sec - gdata.start_time.tv_sec
+    );
+    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
+        stats->rtt_min,
+        stats->rtt_avg,
+        stats->rtt_max,
+        stats->p_received ? (stats->rtt_mdiffsum / stats->p_received) : 0.
+    );
+}
