@@ -14,7 +14,7 @@ void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
 
 void    fill_pkt(t_pkt *pkt)
 {
-	pkt->icmphdr->un.echo.sequence = gdata.stats.p_sent++;
+	pkt->icmphdr->un.echo.sequence = gdata.stats.p_sent;
     pkt->icmphdr->checksum = 0;
     pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, sizeof(struct icmphdr));
 }
@@ -31,13 +31,16 @@ void    send_pkt(int sktfd, t_pkt *pkt)
         pkt->daddr, sizeof(*pkt->daddr)
     );
 
-    printf("sendto() ret:   %d\n", msgsend_len);
-    printf("sendto() errno: %d\n", errno);
+    // printf("sendto() ret:   %d\n", msgsend_len);
+    // printf("sendto() errno: %d\n", errno);
     if (msgsend_len == -1)
         perror(NULL), exit(1);
     else
+    {
+        // stats->p_sent++;
         gdata.stats.pktsend_time = get_time();
-    printf("\n");
+    }
+    // printf("\n");
 }
 
 void    update_stats(t_statistics *stats)
@@ -47,32 +50,28 @@ void    update_stats(t_statistics *stats)
         Compute Avg to update rtt_mdiffsum.
         Update rtt_mdiffsum to compute mdev at the end.
     */
-    float   dtime =
-        stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec +
-        (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
-    if (dtime < 0)  // WTTFFF ??? Pourquoi 1000 de diff ?  fin = debut - 1000 + temps du ping
-        dtime += 1000;
-    stats->p_received++;
-    if (dtime < stats->rtt_min || !stats->rtt_min)
-        stats->rtt_min = dtime;
-    if (stats->rtt_max < dtime)
-        stats->rtt_max = dtime;
-    stats->rtt_sum += dtime;
+
+    if (stats->pkt_dtime < stats->rtt_min || !stats->rtt_min)
+        stats->rtt_min = stats->pkt_dtime;
+    if (stats->rtt_max < stats->pkt_dtime)
+        stats->rtt_max = stats->pkt_dtime;
+    stats->rtt_sum += stats->pkt_dtime;
     stats->rtt_avg = stats->rtt_sum / stats->p_received;
-    stats->rtt_mdiffsum += ft_abs(dtime - stats->rtt_avg);
-    // printf("%ld bytes from par21s22-in-f4.1e100.net (142.250.178.132): icmp_seq=4 ttl=107 time=42.3 ms\n", PKTSIZE);
+    stats->rtt_mdiffsum += ft_abs(stats->pkt_dtime - stats->rtt_avg);
     
+    // printf("send sec : %ld\n", stats->pktsend_time.tv_sec);
+    // printf("send usec: %ld\n", stats->pktsend_time.tv_usec / 1000);
+
     // printf("send: %f\n", stats->pktsend_time.tv_sec + stats->pktsend_time.tv_usec / 1000.0);
     // printf("recv: %f\n", stats->pktrecv_time.tv_sec + stats->pktrecv_time.tv_usec / 1000.0);
-    // printf("dtime: %f\n", dtime);
+    
+    // printf("stats->pkt_dtime: %f\n", stats->pkt_dtime);
     // printf("avg: %f\n", stats->rtt_avg);
-    // printf("Add abs(%f) to stats->rtt_mdiffsum\n", dtime - stats->rtt_avg);
-    // printf("Add %f to stats->rtt_mdiffsum\n", ft_abs(dtime - stats->rtt_avg));
-    // if (dtime < 0)
-    //     printf("wtff dtime < 0: %f\n", dtime), exit(1);
+    // printf("Add abs(%f) to stats->rtt_mdiffsum\n", stats->pkt_dtime - stats->rtt_avg);
+    // printf("Add %f to stats->rtt_mdiffsum\n", ft_abs(stats->pkt_dtime - stats->rtt_avg));
 }
 
-int     recv_pkt(int sktfd)
+int     recv_pkt(int sktfd, t_statistics *stats)
 {
     struct msghdr       msghdr;
     char                namebuff[BUFF_SIZE];
@@ -80,7 +79,7 @@ int     recv_pkt(int sktfd)
     char                controlbuff[BUFF_SIZE];
     // struct sockaddr_in  buff;
     struct iovec        msgiov;
-    int                 recvmsg_len = -1;
+    int                 recvlen = -1;
 
     bzero((void *)&namebuff, sizeof(namebuff));
     bzero((void *)&recvbuff, sizeof(recvbuff));
@@ -96,14 +95,14 @@ int     recv_pkt(int sktfd)
     };
 
     // ret = -1 => EAGAIN => Nothing to receive
-    recvmsg_len = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
-    gdata.stats.pktrecv_time = get_time();
+    recvlen = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
+    stats->pktrecv_time = get_time();
 
-    printf("recvmsg() ret:   %d\n", recvmsg_len);
-    printf("recvmsg() errno: %d\n", errno);
-    if (recvmsg_len == -1)
-        perror(NULL);
-    printf("\n");
+    // printf("recvmsg() ret:   %d\n", recvlen);
+    // printf("recvmsg() errno: %d\n", errno);
+    // if (recvlen == -1)
+    //     perror(NULL);
+    // printf("\n");
 
     // print_msghdr(&msghdr);
 
@@ -113,14 +112,29 @@ int     recv_pkt(int sktfd)
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     // print_icmphdr(icmphdr);
 
+    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics
     if (icmphdr->type != ICMP_ECHOREPLY ||
         icmphdr->code != 0 ||
         icmphdr->un.echo.id != gdata.pid ||
-        icmphdr->un.echo.sequence != gdata.stats.p_sent - 1)
-        printf("icmphdr recieved is wrong\n"), exit(1);
+        icmphdr->un.echo.sequence != stats->p_sent - 1)
+    {
+        // printf("icmphdr recieved is wrong\n");
+        // exit(1);
+    }
     else
-        update_stats(&gdata.stats);
+    {
+        stats->p_received++; // Need to increase p_received before update_stats()
+        // printf("Update stats...\n");
+
+        // Compute ping for this packet (delta time)
+        stats->pkt_dtime = (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
+        if (stats->pktsend_time.tv_sec != stats->pktrecv_time.tv_sec)
+            stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
+
+        update_stats(stats);
+        print_successfull_recv(stats, recvlen);
+    }
     
-    printf("\n");
-    return recvmsg_len;
+    // printf("\n");
+    return recvlen;
 }

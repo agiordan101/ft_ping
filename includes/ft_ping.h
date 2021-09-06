@@ -27,7 +27,7 @@
 // #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
 
 # define TTL            60
-# define RECVTIMEOUTMS  1000
+# define RECVTIMEOUTMS  314
 
 # define BUFF_SIZE      420
 // #define SKTOPT_LVL      IPPROTO_ICMP
@@ -48,6 +48,7 @@ typedef struct      s_pkt
 typedef struct      s_statistics {
     struct timeval  pktsend_time;
     struct timeval  pktrecv_time;
+    float           pkt_dtime;
     int             p_sent;             // Number of packets sent
     int             p_received;         // Number of packets received
     int             p_lost;             // Number of packets lost (p_sent - p_received)
@@ -65,6 +66,7 @@ typedef struct      s_gdata
     int             pid;
     int             pinging_loop;
     char            *hostname;
+    char            ipv4[INET_ADDRSTRLEN];
     t_statistics    stats;
 }                   t_gdata;
 
@@ -74,7 +76,7 @@ int     create_skt();
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr);
 void    fill_pkt(t_pkt *pkt);
 void    send_pkt(int sktfd, t_pkt *pkt);
-int     recv_pkt(int sktfd);
+int     recv_pkt(int sktfd, t_statistics *stats);
 void    update_stats(t_statistics *stats);
 
 float			ft_abs(float x);
@@ -85,4 +87,5 @@ struct timeval  get_time();
 void			print_iphdr(struct iphdr *iphdr);
 void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
-void			print_stats();
+void			print_stats(t_statistics *stats);
+void            print_successfull_recv(t_statistics *stats, int recvlen);

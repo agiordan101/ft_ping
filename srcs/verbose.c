@@ -82,17 +82,29 @@ void			print_icmphdr(struct icmphdr *icmphdr)
     printf("\n");
 }
 
-void			print_stats()
+void			print_successfull_recv(t_statistics *stats, int recvlen)
 {
-    t_statistics    *stats = &gdata.stats;
+	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%.1f ms\n",
+		recvlen,
+		gdata.ipv4,
+		stats->p_sent,
+		TTL,
+		stats->pkt_dtime
+	);
+	(void)recvlen;
+	(void)stats;
+}
 
-    printf("--- %s ping statistics ---\n", gdata.hostname);
-    printf("%d packets transmitted, %d received, %.3f%% packet loss, time %lds\n",
+void			print_stats(t_statistics *stats)
+{
+    printf("\n--- %s ping statistics ---\n", gdata.hostname);
+    printf("%d packets transmitted, %d received, %f%% packet loss, time %ldms\n",
         stats->p_sent,
         stats->p_received,
-        stats->p_sent ? (100 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0.,
-        gdata.end_time.tv_sec - gdata.start_time.tv_sec
+        stats->p_sent ? (100.0 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0.,
+        (gdata.end_time.tv_sec - gdata.start_time.tv_sec) * 1000 + (gdata.end_time.tv_usec - gdata.start_time.tv_usec) / 1000
     );
+	// printf("stats->rtt_mdiffsum: %.3f\n", stats->rtt_mdiffsum);
     printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
         stats->rtt_min,
         stats->rtt_avg,

@@ -5,6 +5,7 @@
     Utilisation autorisé d'une globale seulement / static?
     Utiliser extern 
     FQDN ???
+    Quelqu'il se passe si le packet non pas recu ? packet perdu ? Ou réel probleme ?
 
 */
 
@@ -20,13 +21,13 @@ void            SIGINT_handler()
     // printf("ctrlc ms diff: %lu\n", gdata.endtime.tv_usec - stats.begin_date.tv_usec);
 
     gdata.end_time = get_time();
-    print_stats();
+    print_stats(&gdata.stats);
     gdata.pinging_loop = false;
     exit(0); // Not the right behavior
 }
 
 // int             pinging(struct in_addr addr, const char *ipv4, struct sockaddr_in *ai_res)
-int             pinging(struct in_addr addr, const char *ipv4)
+int             pinging(struct in_addr addr)
 {
     struct sockaddr_in  destaddr = (struct sockaddr_in){
         AF_INET, 42, addr, {0}
@@ -42,22 +43,21 @@ int             pinging(struct in_addr addr, const char *ipv4)
     // if (gdata.pinging_loop)
     // for (int i = 0; i < 10; i++)
     {
-        printf("\nPing ...\n");
+        // printf("\nPing ...\n");
 
         fill_pkt(&pkt);
         send_pkt(sktfd, &pkt);
         // while (ret == -1)
-        ret = recv_pkt(sktfd);
+        ret = recv_pkt(sktfd, &gdata.stats);
         (void)ret;
 
         // printf("destaddr.sin_addr.s_addr: %d\n", destaddr.sin_addr.s_addr);
         // printf("destaddr.sin_port: %d\n", destaddr.sin_port);
         // printf("destaddr.sin_family: %d\n", destaddr.sin_family);
 
-        printf("End ping.\n");
+        // printf("End ping.\n");
     }
     close(sktfd);
-    (void)ipv4;
     return 0;
 }
 
@@ -66,7 +66,7 @@ int             pinging(struct in_addr addr, const char *ipv4)
 int             main(int argc, char **argv)
 {
     struct in_addr  addr;
-    char    *ipv4 = malloc(INET_ADDRSTRLEN);
+    // char    *ipv4 = malloc(INET_ADDRSTRLEN);
     // printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
 
     // char    *ret;
@@ -93,13 +93,13 @@ int             main(int argc, char **argv)
     memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length);
 
     // Transform struct in_addr to IP address text --- addr to ipv4
-    inet_ntop(AF_INET, &addr, ipv4, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &addr, gdata.ipv4, INET_ADDRSTRLEN);
 
     // inet_ntop(AF_INET, &dns_lookup->h_addr, ipv4, INET_ADDRSTRLEN);
 
-    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, ipv4, 56, 84);
+    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
 
-    pinging(addr, ipv4);
+    pinging(addr);
 
     return 0;
 }
