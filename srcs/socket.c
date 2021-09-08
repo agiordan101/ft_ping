@@ -17,7 +17,8 @@ int     create_skt()
         perror(NULL), exit(1);
 
     // Set receive timeout
-    struct timeval rcv_timeout = {(int)RECVTIMEOUTMS / 1000, RECVTIMEOUTMS % 1000};
+    struct timeval rcv_timeout = {RECVTIMEOUTMS / 1000.0, RECVTIMEOUTMS % 1000};
+    printf("Receive timeout: %ldk%ld\n", rcv_timeout.tv_sec, rcv_timeout.tv_usec);
     if (setsockopt(sktfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&rcv_timeout, sizeof(rcv_timeout)) < 0)
         perror(NULL), exit(1);
 

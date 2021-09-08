@@ -18,18 +18,18 @@
 #include <arpa/inet.h>
 
 // # define ABS(x)         (x < 0 ? -x : x)
-#define PAYLOAD         "pingpong?"
 
 #define IPHDR_SIZE      sizeof(struct iphdr)
 #define ICMPHDR_SIZE    sizeof(struct icmphdr)
+#define PAYLOAD         "Wesh google ca raconte quoi frero ?"
 #define PAYLOAD_SIZE    sizeof(PAYLOAD)
-#define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE
-// #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
+// #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE
+#define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
 
 # define TTL            60
-# define RECVTIMEOUTMS  314
+# define RECVTIMEOUTMS  1000
 
-# define BUFF_SIZE      420
+# define BUFF_SIZE      420 //42?
 // #define SKTOPT_LVL      IPPROTO_ICMP
 // #define SKTOPT_LVL      IPPROTO_IP
 // #define SKTOPT_LVL      SOL_SOCKET
@@ -38,17 +38,17 @@
 
 typedef struct      s_pkt
 {
-    struct sockaddr *daddr;     //Destination address
 	char			*buff;      //Buffer with headers and payload
 	// struct iphdr    *iphdr;
-	struct icmphdr  *icmphdr;
-    // char            *payload;
+	struct icmphdr  *icmphdr;   // Point into buff
+    char            *payload;   // Point into buff
+    struct sockaddr *daddr;     //Destination address
 }				    t_pkt;
 
 typedef struct      s_statistics {
     struct timeval  pktsend_time;
     struct timeval  pktrecv_time;
-    float           pkt_dtime;
+    long int        pkt_dtime;          // milliseconds
     int             p_sent;             // Number of packets sent
     int             p_received;         // Number of packets received
     int             p_lost;             // Number of packets lost (p_sent - p_received)
@@ -70,13 +70,13 @@ typedef struct      s_gdata
     t_statistics    stats;
 }                   t_gdata;
 
-extern t_gdata  gdata;
+extern t_gdata      gdata;
 
 int     create_skt();
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr);
-void    fill_pkt(t_pkt *pkt);
+void    fill_pkt(t_pkt *pkt, int p_seq);
 void    send_pkt(int sktfd, t_pkt *pkt);
-int     recv_pkt(int sktfd, t_statistics *stats);
+int     recv_pkt(int sktfd, t_statistics *stats, int p_seq);
 void    update_stats(t_statistics *stats);
 
 float			ft_abs(float x);
@@ -88,4 +88,4 @@ void			print_iphdr(struct iphdr *iphdr);
 void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
 void			print_stats(t_statistics *stats);
-void            print_successfull_recv(t_statistics *stats, int recvlen);
+void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);

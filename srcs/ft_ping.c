@@ -35,6 +35,7 @@ int             pinging(struct in_addr addr)
     t_pkt               pkt;
     int                 sktfd;
     int                 ret = -1;
+    int                 p_seq = 0;
 
     sktfd = create_skt();
     init_pkt(&pkt, &destaddr);
@@ -45,10 +46,10 @@ int             pinging(struct in_addr addr)
     {
         // printf("\nPing ...\n");
 
-        fill_pkt(&pkt);
+        fill_pkt(&pkt, p_seq);
         send_pkt(sktfd, &pkt);
         // while (ret == -1)
-        ret = recv_pkt(sktfd, &gdata.stats);
+        ret = recv_pkt(sktfd, &gdata.stats, p_seq);
         (void)ret;
 
         // printf("destaddr.sin_addr.s_addr: %d\n", destaddr.sin_addr.s_addr);
@@ -56,6 +57,7 @@ int             pinging(struct in_addr addr)
         // printf("destaddr.sin_family: %d\n", destaddr.sin_family);
 
         // printf("End ping.\n");
+        p_seq++;
     }
     close(sktfd);
     return 0;

@@ -82,13 +82,13 @@ void			print_icmphdr(struct icmphdr *icmphdr)
     printf("\n");
 }
 
-void			print_successfull_recv(t_statistics *stats, int recvlen)
+void			print_successfull_recv(t_statistics *stats, int recvlen, int ttl)
 {
-	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%.1f ms\n",
+	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%ld ms\n",
 		recvlen,
 		gdata.ipv4,
 		stats->p_sent,
-		TTL,
+		ttl,
 		stats->pkt_dtime
 	);
 	(void)recvlen;

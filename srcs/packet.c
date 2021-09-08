@@ -2,21 +2,26 @@
 
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
 {
-    if (!(pkt->buff = (char *)calloc(1, PKTSIZE)))
+    // Data set one time for all packets
+    if (!(pkt->buff = (char *)calloc(1, ICMPHDR_SIZE + PAYLOAD_SIZE)))
         perror(NULL), exit(1);
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
+    pkt->payload = (char *)(pkt->icmphdr + ICMPHDR_SIZE);
+    printf("payload init: %s\n", pkt->payload);
+    memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
+    printf("payload init: %s\n", pkt->payload);
     pkt->icmphdr->type = ICMP_ECHO;
 	pkt->icmphdr->code = 0; // Useless
 	pkt->icmphdr->un.echo.id = gdata.pid;
     pkt->daddr = (struct sockaddr *)destaddr;
-    // memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
 }
 
-void    fill_pkt(t_pkt *pkt)
+void    fill_pkt(t_pkt *pkt, int p_seq)
 {
-	pkt->icmphdr->un.echo.sequence = gdata.stats.p_sent;
+	pkt->icmphdr->un.echo.sequence = p_seq;
     pkt->icmphdr->checksum = 0;
-    pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, sizeof(struct icmphdr));
+    // pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, sizeof(struct icmphdr));
+    pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, ICMPHDR_SIZE + PAYLOAD_SIZE);
 }
 
 void    send_pkt(int sktfd, t_pkt *pkt)
@@ -25,10 +30,11 @@ void    send_pkt(int sktfd, t_pkt *pkt)
     // printf("Payload: >%s<\n", pkt->payload);
 
     int msgsend_len = sendto(
-        sktfd,
-        pkt->icmphdr, sizeof(pkt->icmphdr),
+        sktfd,                                  // How
+        // pkt->icmphdr, sizeof(pkt->icmphdr),     // What
+        pkt->icmphdr, ICMPHDR_SIZE + PAYLOAD_SIZE,     // What
         0, // Flags
-        pkt->daddr, sizeof(*pkt->daddr)
+        pkt->daddr, sizeof(*pkt->daddr)         // Where
     );
 
     // printf("sendto() ret:   %d\n", msgsend_len);
@@ -71,13 +77,12 @@ void    update_stats(t_statistics *stats)
     // printf("Add %f to stats->rtt_mdiffsum\n", ft_abs(stats->pkt_dtime - stats->rtt_avg));
 }
 
-int     recv_pkt(int sktfd, t_statistics *stats)
+int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 {
     struct msghdr       msghdr;
     char                namebuff[BUFF_SIZE];
     char                recvbuff[PKTSIZE];
     char                controlbuff[BUFF_SIZE];
-    // struct sockaddr_in  buff;
     struct iovec        msgiov;
     int                 recvlen = -1;
 
@@ -96,43 +101,54 @@ int     recv_pkt(int sktfd, t_statistics *stats)
 
     // ret = -1 => EAGAIN => Nothing to receive
     recvlen = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
-    stats->pktrecv_time = get_time();
 
+    // Compute delta time for this packet
+    stats->pktrecv_time = get_time();
+    stats->pkt_dtime = (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
+    if (stats->pktsend_time.tv_sec != stats->pktrecv_time.tv_sec)
+        stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
+
+    // printf("stats->pkt_dtime: %ld ms / recvlen: %d\n", stats->pkt_dtime, recvlen);
+    
+    // printf("Send time: %ldk%ld\n", stats->pktsend_time.tv_sec, stats->pktsend_time.tv_usec);
+    // printf("Recv time: %ldk%ld\n", stats->pktrecv_time.tv_sec, stats->pktrecv_time.tv_usec);
     // printf("recvmsg() ret:   %d\n", recvlen);
-    // printf("recvmsg() errno: %d\n", errno);
-    // if (recvlen == -1)
-    //     perror(NULL);
+    if (recvlen == -1)
+    {
+        printf("recvmsg() errno: %d\n", errno);
+        perror(NULL);
+        exit(0);
+    }
     // printf("\n");
 
     // print_msghdr(&msghdr);
 
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
-    // print_iphdr(iphdr);
 
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
-    // print_icmphdr(icmphdr);
 
-    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics
+    char *payload = (char *)(icmphdr + ICMPHDR_SIZE);
+    printf("Payload: %s\n", payload);
+
+    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics & test echo.sequence msgrecv
     if (icmphdr->type != ICMP_ECHOREPLY ||
         icmphdr->code != 0 ||
         icmphdr->un.echo.id != gdata.pid ||
-        icmphdr->un.echo.sequence != stats->p_sent - 1)
+        icmphdr->un.echo.sequence != p_seq)
     {
-        // printf("icmphdr recieved is wrong\n");
+        printf("icmphdr recieved is wrong\n");
+        printf("Attemps icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", ICMP_ECHOREPLY, 0, gdata.pid, p_seq);
+        printf("Receive icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", icmphdr->type, icmphdr->code, icmphdr->un.echo.id, icmphdr->un.echo.sequence);
+        print_iphdr(iphdr);
+        print_icmphdr(icmphdr);
         // exit(1);
     }
     else
     {
         stats->p_received++; // Need to increase p_received before update_stats()
         // printf("Update stats...\n");
-
-        // Compute ping for this packet (delta time)
-        stats->pkt_dtime = (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
-        if (stats->pktsend_time.tv_sec != stats->pktrecv_time.tv_sec)
-            stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
-
         update_stats(stats);
-        print_successfull_recv(stats, recvlen);
+        print_successfull_recv(stats, recvlen, iphdr->ttl);
     }
     
     // printf("\n");
