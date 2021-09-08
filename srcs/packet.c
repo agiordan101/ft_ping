@@ -2,11 +2,13 @@
 
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
 {
+    printf("paylod len: %ld\n", strlen(PAYLOAD));
     // Data set one time for all packets
     if (!(pkt->buff = (char *)calloc(1, ICMPHDR_SIZE + PAYLOAD_SIZE)))
         perror(NULL), exit(1);
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
-    pkt->payload = (char *)(pkt->icmphdr + ICMPHDR_SIZE);
+    // pkt->payload = (char *)pkt->icmphdr + ICMPHDR_SIZE;
+    pkt->payload = pkt->buff + ICMPHDR_SIZE;
     printf("payload init: %s\n", pkt->payload);
     memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
     printf("payload init: %s\n", pkt->payload);
@@ -101,6 +103,7 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     // ret = -1 => EAGAIN => Nothing to receive
     recvlen = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
+    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics & test icmphdr->un.echo.sequence msgrecv
 
     // Compute delta time for this packet
     stats->pktrecv_time = get_time();
@@ -116,8 +119,9 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     if (recvlen == -1)
     {
         printf("recvmsg() errno: %d\n", errno);
-        perror(NULL);
-        exit(0);
+        // perror(NULL);
+        // exit(0);
+        return -1;
     }
     // printf("\n");
 
@@ -127,10 +131,9 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
 
-    char *payload = (char *)(icmphdr + ICMPHDR_SIZE);
-    printf("Payload: %s\n", payload);
+    char *payload = (char *)icmphdr + ICMPHDR_SIZE;
+    // printf("Payload: %s\n", payload);
 
-    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics & test echo.sequence msgrecv
     if (icmphdr->type != ICMP_ECHOREPLY ||
         icmphdr->code != 0 ||
         icmphdr->un.echo.id != gdata.pid ||
@@ -150,7 +153,7 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         update_stats(stats);
         print_successfull_recv(stats, recvlen, iphdr->ttl);
     }
-    
+    (void)payload;
     // printf("\n");
     return recvlen;
 }
