@@ -4,9 +4,10 @@
 
     Utilisation autorisé d'une globale seulement / static?
     Utiliser extern 
-    FQDN ???
+    FQDN ??? resolution dns ?
     Quelqu'il se passe si le packet non pas recu ? packet perdu ? Ou réel probleme ?
-
+    -v -h
+    resolution inver DNS
 */
 
 t_gdata  gdata;
@@ -63,15 +64,8 @@ int             pinging(struct in_addr addr)
     return 0;
 }
 
-// void            init()
-
-int             main(int argc, char **argv)
+void            parsing(char **argv, int argc)
 {
-    struct in_addr  addr;
-    // char    *ipv4 = malloc(INET_ADDRSTRLEN);
-    // printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
-
-    // char    *ret;
     if (argc < 2)
     {
         printf("usage: ./ft_ping hostname");
@@ -85,23 +79,63 @@ int             main(int argc, char **argv)
         gdata.pid = getpid();
     }
 
+}
 
-    // When CTRL+C is pressed, SIGINT_handler() is called
-    signal(SIGINT, SIGINT_handler);
+struct in_addr  get_addr()
+{
+    struct in_addr  addr;
 
     struct hostent  *dns_lookup = gethostbyname(gdata.hostname);
+
+    printf("addr(len): %s(%d)\n", dns_lookup->h_addr, dns_lookup->h_length);
 
     // Copy the binary address into struct in_addr
     memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length);
 
-    // Transform struct in_addr to IP address text --- addr to ipv4
+    // printf("Binary addr: %s\n", dns_lookup->h_addr);
+    // printf("addr: %s\n", addr.s_addr);
+
+    // Transform struct in_addr (Binary adress) to IP address text --- addr to ipv4
     inet_ntop(AF_INET, &addr, gdata.ipv4, INET_ADDRSTRLEN);
 
     // inet_ntop(AF_INET, &dns_lookup->h_addr, ipv4, INET_ADDRSTRLEN);
 
     printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
+    return addr;
+}
 
-    pinging(addr);
+struct in_addr  new_get_addr()
+{
+    struct addrinfo hints = {0, AF_INET, SOCK_RAW, IPPROTO_ICMP};
+    struct addrinfo *res = NULL;
+    struct in_addr  addr = {};
+
+    int errcode = getaddrinfo(gdata.hostname, NULL, NULL, &res);
+    // errcode = getaddrinfo(gdata.hostname, NULL, hints, res);
+    printf("errcode: %d\n", errcode);
+
+    while (res)
+    {
+        print_addrinfo(res);
+        res = res->ai_next;
+    }
+    return addr;
+}
+
+int             main(int argc, char **argv)
+{
+    // printf("Sizeof IPHDR / ICMPHDR / PAYLOAD: %ld / %ld / %ld\n", IPHDR_SIZE, ICMPHDR_SIZE, PAYLOAD_SIZE);
+
+    parsing(argv, argc);
+
+    // When CTRL+C is pressed, SIGINT_handler() is called
+    signal(SIGINT, SIGINT_handler);
+
+    // struct in_addr addr = get_addr();
+    struct in_addr addr = new_get_addr();
+
+    exit(0);
+    pinging(addr); //At this state, need only addr et ivp4
 
     return 0;
 }

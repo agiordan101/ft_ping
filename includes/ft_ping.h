@@ -21,7 +21,7 @@
 
 #define IPHDR_SIZE      sizeof(struct iphdr)
 #define ICMPHDR_SIZE    sizeof(struct icmphdr)
-#define PAYLOAD         "Wesh google ca raconte quoi frero ?"
+#define PAYLOAD         "Salut google, ca dis quoi le boss ?"
 #define PAYLOAD_SIZE    sizeof(PAYLOAD)
 // #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE
 #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
@@ -48,7 +48,7 @@ typedef struct      s_pkt
 typedef struct      s_statistics {
     struct timeval  pktsend_time;
     struct timeval  pktrecv_time;
-    long int        pkt_dtime;          // milliseconds
+    float           pkt_dtime;          // milliseconds
     int             p_sent;             // Number of packets sent
     int             p_received;         // Number of packets received
     int             p_lost;             // Number of packets lost (p_sent - p_received)
@@ -87,5 +87,7 @@ struct timeval  get_time();
 void			print_iphdr(struct iphdr *iphdr);
 void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
+void			print_addrinfo(struct addrinfo *addrinfo);
+
 void			print_stats(t_statistics *stats);
 void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);

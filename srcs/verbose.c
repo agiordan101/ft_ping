@@ -82,9 +82,22 @@ void			print_icmphdr(struct icmphdr *icmphdr)
     printf("\n");
 }
 
+void			print_addrinfo(struct addrinfo *addrinfo)
+{
+	printf("addrinfo: %p\n", addrinfo);
+	printf("addrinfo->ai_flags: %d\n", addrinfo->ai_flags);
+	printf("addrinfo->ai_family: %d\n", addrinfo->ai_family);
+	printf("addrinfo->ai_socktype: %d\n", addrinfo->ai_socktype);
+	printf("addrinfo->ai_protocol: %d\n", addrinfo->ai_protocol);
+	printf("addrinfo->ai_addr: %p (len=%ld)\n", addrinfo->ai_addr, addrinfo->ai_addrlen);
+	printf("addrinfo->ai_canonname: %d\n", addrinfo->ai_canonname);
+	printf("addrinfo->ai_next: %p\n", addrinfo->ai_next);
+    printf("\n");
+}
+
 void			print_successfull_recv(t_statistics *stats, int recvlen, int ttl)
 {
-	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%ld ms\n",
+	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%.2f ms\n",
 		recvlen,
 		gdata.ipv4,
 		stats->p_sent,

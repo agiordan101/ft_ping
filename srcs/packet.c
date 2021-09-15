@@ -112,9 +112,10 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
 
     // printf("stats->pkt_dtime: %ld ms / recvlen: %d\n", stats->pkt_dtime, recvlen);
-    
-    // printf("Send time: %ldk%ld\n", stats->pktsend_time.tv_sec, stats->pktsend_time.tv_usec);
-    // printf("Recv time: %ldk%ld\n", stats->pktrecv_time.tv_sec, stats->pktrecv_time.tv_usec);
+
+    // printf("Send time: %ld k %ld\n", stats->pktsend_time.tv_sec, stats->pktsend_time.tv_usec);
+    // printf("Recv time: %ld k %ld\n", stats->pktrecv_time.tv_sec, stats->pktrecv_time.tv_usec);
+    // printf("stats->pkt_dtime: %f\n", stats->pkt_dtime);
     // printf("recvmsg() ret:   %d\n", recvlen);
     if (recvlen == -1)
     {
