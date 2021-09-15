@@ -13,11 +13,16 @@ struct msghdr {
     int           msg_flags;      /* flags on received message */
 };
 
+/* Adresse Internet */
+struct in_addr {
+    uint32_t       s_addr;     /* Adresse dans l'ordre d'octets réseau */
+};
+
 struct sockaddr {
         ushort  sa_family;
         char    sa_data[14];
 };
-
+// sockaddr = sockaddr_in
 struct sockaddr_in {
         short   sin_family;
         u_short sin_port;
@@ -25,9 +30,15 @@ struct sockaddr_in {
         char    sin_zero[8];
 };
 
-/* Adresse Internet */
-struct in_addr {
-    uint32_t       s_addr;     /* Adresse dans l'ordre d'octets réseau */
+struct addrinfo {
+    int              ai_flags;
+    int              ai_family;     // AF_INET      2
+    int              ai_socktype;   // SOCK_STREAM  1 / SOCK_DGRAM   2 / SOCK_RAW   3
+    int              ai_protocol;
+    size_t           ai_addrlen;
+    struct sockaddr *ai_addr;
+    char            *ai_canonname;
+    struct addrinfo *ai_next;
 };
 
 struct timeval {
@@ -66,9 +77,3 @@ uint8_t 	protocol
 uint16_t 	chksum
 struct in_addr 	src
 struct in_addr 	dest
-
-
-1.9 2.2  1 + -0.7 = 0.3
-1.2 2.9  1 + 0.7 = 1.7
-
-

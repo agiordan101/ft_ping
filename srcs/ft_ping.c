@@ -12,6 +12,17 @@
 
 t_gdata  gdata;
 
+void            free_all()
+{
+    printf("Free time !\n");
+}
+
+void            freexit(int exit_code)
+{
+    free_all();
+    exit(exit_code);
+}
+
 void            SIGINT_handler()
 {
     // printf("ctrlc s: %lu\n", (unsigned long)stats.begin_date.tv_sec);
@@ -35,7 +46,6 @@ int             pinging(struct in_addr addr)
     };
     t_pkt               pkt;
     int                 sktfd;
-    int                 ret = -1;
     int                 p_seq = 0;
 
     sktfd = create_skt();
@@ -50,8 +60,7 @@ int             pinging(struct in_addr addr)
         fill_pkt(&pkt, p_seq);
         send_pkt(sktfd, &pkt);
         // while (ret == -1)
-        ret = recv_pkt(sktfd, &gdata.stats, p_seq);
-        (void)ret;
+        recv_pkt(sktfd, &gdata.stats, p_seq);
 
         // printf("destaddr.sin_addr.s_addr: %d\n", destaddr.sin_addr.s_addr);
         // printf("destaddr.sin_port: %d\n", destaddr.sin_port);
@@ -81,45 +90,39 @@ void            parsing(char **argv, int argc)
 
 }
 
-struct in_addr  get_addr()
-{
-    struct in_addr  addr;
-
-    struct hostent  *dns_lookup = gethostbyname(gdata.hostname);
-
-    printf("addr(len): %s(%d)\n", dns_lookup->h_addr, dns_lookup->h_length);
-
-    // Copy the binary address into struct in_addr
-    memcpy(&addr, dns_lookup->h_addr, dns_lookup->h_length);
-
-    // printf("Binary addr: %s\n", dns_lookup->h_addr);
-    // printf("addr: %s\n", addr.s_addr);
-
-    // Transform struct in_addr (Binary adress) to IP address text --- addr to ipv4
-    inet_ntop(AF_INET, &addr, gdata.ipv4, INET_ADDRSTRLEN);
-
-    // inet_ntop(AF_INET, &dns_lookup->h_addr, ipv4, INET_ADDRSTRLEN);
-
-    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
-    return addr;
-}
-
 struct in_addr  new_get_addr()
 {
-    struct addrinfo hints = {0, AF_INET, SOCK_RAW, IPPROTO_ICMP};
-    struct addrinfo *res = NULL;
-    struct in_addr  addr = {};
+    int             errcode;
+    struct addrinfo *res;
+    struct addrinfo hints = {
+        AI_CANONNAME, AF_INET, SOCK_RAW, IPPROTO_ICMP,
+        0, NULL, NULL, NULL
+    };
 
-    int errcode = getaddrinfo(gdata.hostname, NULL, NULL, &res);
-    // errcode = getaddrinfo(gdata.hostname, NULL, hints, res);
-    printf("errcode: %d\n", errcode);
+    if ((errcode = getaddrinfo(gdata.hostname, NULL, &hints, &gdata.res)))
+        printf("[ERROR] Unable to find an internet address because getaddrinfo() failed. errcode: %d\n", errcode), exit(EXIT_FAILURE);
 
+    res = gdata.res;
     while (res)
     {
-        print_addrinfo(res);
+        if (res->ai_socktype == SOCK_RAW &&
+            res->ai_family == AF_INET)
+        {
+            // printf("Find right struct\n");
+            struct sockaddr_in *sockaddr_in = (struct sockaddr_in *)res->ai_addr;
+            printf("sockaddr_in->sin_family: %d\n", sockaddr_in->sin_family);
+            printf("sockaddr_in->sin_port: %d\n", sockaddr_in->sin_port);
+            print_addrinfo(res);
+            if (sockaddr_in)
+            {
+                freeaddrinfo(res);
+                return sockaddr_in->sin_addr;
+            }
+        }
         res = res->ai_next;
     }
-    return addr;
+    printf("[ERROR] Unable to find an internet address with AF_INET as family and SOCK_RAW as socktype.\n");
+    exit(EXIT_FAILURE);
 }
 
 int             main(int argc, char **argv)
@@ -134,9 +137,14 @@ int             main(int argc, char **argv)
     // struct in_addr addr = get_addr();
     struct in_addr addr = new_get_addr();
 
-    exit(0);
-    pinging(addr); //At this state, need only addr et ivp4
+    // Transform struct in_addr (Binary adress) to IP address text --- addr to ipv4
+    inet_ntop(AF_INET, &addr, gdata.ipv4, INET_ADDRSTRLEN);
 
+    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
+    // exit(0);
+
+    pinging(addr); //At this state, need only addr et ivp4
+    free_all();
     return 0;
 }
     // printf("h_name: %s / addrs: %p / h_addrtype: %d=?=%d / h_length: %d\n", dns_lookup->h_name, dns_lookup->h_addr_list, dns_lookup->h_addrtype, AF_INET, dns_lookup->h_length);

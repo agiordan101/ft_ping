@@ -61,6 +61,7 @@ typedef struct      s_statistics {
 
 typedef struct      s_gdata
 {
+    struct addrinfo *res;           // List of internet address
     struct timeval  start_time;     // Program start time
     struct timeval  end_time;       // Program end time
     int             pid;
@@ -76,7 +77,7 @@ int     create_skt();
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr);
 void    fill_pkt(t_pkt *pkt, int p_seq);
 void    send_pkt(int sktfd, t_pkt *pkt);
-int     recv_pkt(int sktfd, t_statistics *stats, int p_seq);
+void    recv_pkt(int sktfd, t_statistics *stats, int p_seq);
 void    update_stats(t_statistics *stats);
 
 float			ft_abs(float x);
@@ -91,3 +92,5 @@ void			print_addrinfo(struct addrinfo *addrinfo);
 
 void			print_stats(t_statistics *stats);
 void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);
+
+void            freexit(int exit_code);

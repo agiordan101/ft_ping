@@ -2,16 +2,12 @@
 
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
 {
-    printf("paylod len: %ld\n", strlen(PAYLOAD));
     // Data set one time for all packets
     if (!(pkt->buff = (char *)calloc(1, ICMPHDR_SIZE + PAYLOAD_SIZE)))
         perror(NULL), exit(1);
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
-    // pkt->payload = (char *)pkt->icmphdr + ICMPHDR_SIZE;
     pkt->payload = pkt->buff + ICMPHDR_SIZE;
-    printf("payload init: %s\n", pkt->payload);
     memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
-    printf("payload init: %s\n", pkt->payload);
     pkt->icmphdr->type = ICMP_ECHO;
 	pkt->icmphdr->code = 0; // Useless
 	pkt->icmphdr->un.echo.id = gdata.pid;
@@ -22,7 +18,6 @@ void    fill_pkt(t_pkt *pkt, int p_seq)
 {
 	pkt->icmphdr->un.echo.sequence = p_seq;
     pkt->icmphdr->checksum = 0;
-    // pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, sizeof(struct icmphdr));
     pkt->icmphdr->checksum = checksum((void *)pkt->icmphdr, ICMPHDR_SIZE + PAYLOAD_SIZE);
 }
 
@@ -79,7 +74,7 @@ void    update_stats(t_statistics *stats)
     // printf("Add %f to stats->rtt_mdiffsum\n", ft_abs(stats->pkt_dtime - stats->rtt_avg));
 }
 
-int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
+void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 {
     struct msghdr       msghdr;
     char                namebuff[BUFF_SIZE];
@@ -119,10 +114,10 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     // printf("recvmsg() ret:   %d\n", recvlen);
     if (recvlen == -1)
     {
-        printf("recvmsg() errno: %d\n", errno);
+        // printf("recvmsg() errno: %d\n", errno);
         // perror(NULL);
-        // exit(0);
-        return -1;
+        // exit(EXIT_FAILURE);
+        return ;
     }
     // printf("\n");
 
@@ -135,26 +130,24 @@ int     recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
     // printf("Payload: %s\n", payload);
 
-    if (icmphdr->type != ICMP_ECHOREPLY ||
-        icmphdr->code != 0 ||
-        icmphdr->un.echo.id != gdata.pid ||
-        icmphdr->un.echo.sequence != p_seq)
-    {
-        printf("icmphdr recieved is wrong\n");
-        printf("Attemps icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", ICMP_ECHOREPLY, 0, gdata.pid, p_seq);
-        printf("Receive icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", icmphdr->type, icmphdr->code, icmphdr->un.echo.id, icmphdr->un.echo.sequence);
-        print_iphdr(iphdr);
-        print_icmphdr(icmphdr);
-        // exit(1);
-    }
-    else
+    if (icmphdr->type == ICMP_ECHOREPLY &&
+        icmphdr->code == 0 &&
+        icmphdr->un.echo.id == gdata.pid &&
+        icmphdr->un.echo.sequence == p_seq &&
+        !strcmp(payload, PAYLOAD))
     {
         stats->p_received++; // Need to increase p_received before update_stats()
         // printf("Update stats...\n");
         update_stats(stats);
         print_successfull_recv(stats, recvlen, iphdr->ttl);
     }
-    (void)payload;
-    // printf("\n");
-    return recvlen;
+    // else
+    // {
+    //     printf("icmphdr recieved is wrong\n");
+    //     printf("Attemps icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", ICMP_ECHOREPLY, 0, gdata.pid, p_seq);
+    //     printf("Receive icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", icmphdr->type, icmphdr->code, icmphdr->un.echo.id, icmphdr->un.echo.sequence);
+    //     print_iphdr(iphdr);
+    //     print_icmphdr(icmphdr);
+    //     exit(EXIT_FAILURE);
+    // }
 }

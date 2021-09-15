@@ -89,8 +89,8 @@ void			print_addrinfo(struct addrinfo *addrinfo)
 	printf("addrinfo->ai_family: %d\n", addrinfo->ai_family);
 	printf("addrinfo->ai_socktype: %d\n", addrinfo->ai_socktype);
 	printf("addrinfo->ai_protocol: %d\n", addrinfo->ai_protocol);
-	printf("addrinfo->ai_addr: %p (len=%ld)\n", addrinfo->ai_addr, addrinfo->ai_addrlen);
-	printf("addrinfo->ai_canonname: %d\n", addrinfo->ai_canonname);
+	printf("addrinfo->ai_addr: %p (len=%d)\n", addrinfo->ai_addr, addrinfo->ai_addrlen);
+	printf("addrinfo->ai_canonname: %s\n", addrinfo->ai_canonname);
 	printf("addrinfo->ai_next: %p\n", addrinfo->ai_next);
     printf("\n");
 }
@@ -111,10 +111,10 @@ void			print_successfull_recv(t_statistics *stats, int recvlen, int ttl)
 void			print_stats(t_statistics *stats)
 {
     printf("\n--- %s ping statistics ---\n", gdata.hostname);
-    printf("%d packets transmitted, %d received, %f%% packet loss, time %ldms\n",
+    printf("%d packets transmitted, %d received, %g%% packet loss, time %ldms\n",
         stats->p_sent,
         stats->p_received,
-        stats->p_sent ? (100.0 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0.,
+        stats->p_sent ? (100.0 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0,
         (gdata.end_time.tv_sec - gdata.start_time.tv_sec) * 1000 + (gdata.end_time.tv_usec - gdata.start_time.tv_usec) / 1000
     );
 	// printf("stats->rtt_mdiffsum: %.3f\n", stats->rtt_mdiffsum);
