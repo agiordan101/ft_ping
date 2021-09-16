@@ -44,7 +44,14 @@ struct timeval  get_time()
     if ((ret = gettimeofday(&time, NULL)))
     {
         printf("Unable to get time, gettimeofday() ret: %d\n", ret);
-        exit(0);
+        freexit(EXIT_FAILURE);
     }
     return time;
+}
+
+int				isfirsttimeupper(struct timeval time, struct timeval to_cmp)
+{
+	if (time.tv_sec == to_cmp.tv_sec)
+		return time.tv_usec > to_cmp.tv_usec ? 1 : 0;
+	return time.tv_sec > to_cmp.tv_sec ? 1 : 0;
 }

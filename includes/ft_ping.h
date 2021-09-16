@@ -28,6 +28,7 @@
 
 # define TTL            60
 # define RECVTIMEOUTMS  1000
+# define DTIMEPKT       1000
 
 # define BUFF_SIZE      420 //42?
 // #define SKTOPT_LVL      IPPROTO_ICMP
@@ -38,7 +39,7 @@
 
 typedef struct      s_pkt
 {
-	char			*buff;      //Buffer with headers and payload
+	char			buff[ICMPHDR_SIZE + PAYLOAD_SIZE];      //Buffer with headers and payload
 	// struct iphdr    *iphdr;
 	struct icmphdr  *icmphdr;   // Point into buff
     char            *payload;   // Point into buff
@@ -61,14 +62,21 @@ typedef struct      s_statistics {
 
 typedef struct      s_gdata
 {
-    struct addrinfo *res;           // List of internet address
-    struct timeval  start_time;     // Program start time
-    struct timeval  end_time;       // Program end time
     int             pid;
-    int             pinging_loop;
     char            *hostname;
     char            ipv4[INET_ADDRSTRLEN];
+    struct addrinfo *res;           // List of internet address
+    t_pkt           *pkt;
+    struct timeval  start_time;     // Program start time
+    struct timeval  end_time;       // Program end time
+    int             pinging_loop;
     t_statistics    stats;
+    int             dtime_pktsend;
+    bool            verbose;
+    bool            floodping;
+    int             maxreplies;
+    int             recv_timeout;
+    int             ttl;
 }                   t_gdata;
 
 extern t_gdata      gdata;
@@ -90,7 +98,9 @@ void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
 void			print_addrinfo(struct addrinfo *addrinfo);
 
+void            print_usage();
 void			print_stats(t_statistics *stats);
 void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);
 
 void            freexit(int exit_code);
+int 			isfirsttimeupper(struct timeval time, struct timeval to_cmp);

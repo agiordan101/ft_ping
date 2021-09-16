@@ -47,7 +47,7 @@ void			print_msghdr(struct msghdr *msghdr)
 
 void			print_iphdr(struct iphdr *iphdr)
 {
-    char			*ipv4 = malloc(INET_ADDRSTRLEN);
+    char			ipv4[INET_ADDRSTRLEN];
 	struct in_addr	addr;
 
 	printf("iphdr: %p\n", iphdr);
@@ -124,4 +124,17 @@ void			print_stats(t_statistics *stats)
         stats->rtt_max,
         stats->p_received ? (stats->rtt_mdiffsum / stats->p_received) : 0.
     );
+}
+
+void			print_usage()
+{
+	printf("\nUsage\n  ft_ping [options] <destination>\n");
+	printf("\nOptions:\n  <destination>\t\tdns name or ip address\n");
+	printf("  -h\t\t\tprint help and exit\n");
+	printf("  -v\t\t\tverbose output\n");
+	printf("  -f\t\t\tflood ping\n");
+	printf("  -c <count>\t\tstop after <count> replies\n");
+	printf("  -i <time>\t\t\twait <time> milliseconds between each packet\n");
+	printf("  -t <ttl>\t\t\tdefine time to live\n");
+	freexit(EXIT_SUCCESS);
 }

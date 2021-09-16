@@ -3,8 +3,8 @@
 void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
 {
     // Data set one time for all packets
-    if (!(pkt->buff = (char *)calloc(1, ICMPHDR_SIZE + PAYLOAD_SIZE)))
-        perror(NULL), exit(1);
+    // if (!(pkt->buff = (char *)calloc(1, ICMPHDR_SIZE + PAYLOAD_SIZE)))
+    //     perror(NULL), freexit(EXIT_FAILURE);
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
     pkt->payload = pkt->buff + ICMPHDR_SIZE;
     memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
@@ -37,11 +37,11 @@ void    send_pkt(int sktfd, t_pkt *pkt)
     // printf("sendto() ret:   %d\n", msgsend_len);
     // printf("sendto() errno: %d\n", errno);
     if (msgsend_len == -1)
-        perror(NULL), exit(1);
+        perror(NULL), freexit(EXIT_FAILURE);
     else
     {
-        // stats->p_sent++;
         gdata.stats.pktsend_time = get_time();
+        gdata.stats.p_sent++;
     }
     // printf("\n");
 }
@@ -53,7 +53,12 @@ void    update_stats(t_statistics *stats)
         Compute Avg to update rtt_mdiffsum.
         Update rtt_mdiffsum to compute mdev at the end.
     */
+    // Compute delta time for this packet
+    stats->pkt_dtime = (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
+    if (stats->pktsend_time.tv_sec != stats->pktrecv_time.tv_sec)
+        stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
 
+    // Update statistics
     if (stats->pkt_dtime < stats->rtt_min || !stats->rtt_min)
         stats->rtt_min = stats->pkt_dtime;
     if (stats->rtt_max < stats->pkt_dtime)
@@ -98,13 +103,8 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     // ret = -1 => EAGAIN => Nothing to receive
     recvlen = recvmsg(sktfd, &msghdr, MSG_WAITALL); // Or flag MSG_DONTWAIT
-    stats->p_sent++; // Save packet sending here to not distort CRTL+C statistics & test icmphdr->un.echo.sequence msgrecv
 
-    // Compute delta time for this packet
     stats->pktrecv_time = get_time();
-    stats->pkt_dtime = (stats->pktrecv_time.tv_usec - stats->pktsend_time.tv_usec) / 1000.0;
-    if (stats->pktsend_time.tv_sec != stats->pktrecv_time.tv_sec)
-        stats->pkt_dtime += (stats->pktrecv_time.tv_sec - stats->pktsend_time.tv_sec) * 1000;
 
     // printf("stats->pkt_dtime: %ld ms / recvlen: %d\n", stats->pkt_dtime, recvlen);
 
@@ -114,13 +114,11 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     // printf("recvmsg() ret:   %d\n", recvlen);
     if (recvlen == -1)
     {
-        // printf("recvmsg() errno: %d\n", errno);
-        // perror(NULL);
-        // exit(EXIT_FAILURE);
-        return ;
+        if (gdata.pinging_loop == false)
+            stats->p_sent--; // Do not distort statistics when CRTL+C crashes recvmsg() function
+        else
+            return ;
     }
-    // printf("\n");
-
     // print_msghdr(&msghdr);
 
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
@@ -137,7 +135,6 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         !strcmp(payload, PAYLOAD))
     {
         stats->p_received++; // Need to increase p_received before update_stats()
-        // printf("Update stats...\n");
         update_stats(stats);
         print_successfull_recv(stats, recvlen, iphdr->ttl);
     }
@@ -148,6 +145,6 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     //     printf("Receive icmphdr->type %d / icmphdr->code %d / icmphdr->un.echo.id %d / icmphdr->un.echo.sequence %d\n", icmphdr->type, icmphdr->code, icmphdr->un.echo.id, icmphdr->un.echo.sequence);
     //     print_iphdr(iphdr);
     //     print_icmphdr(icmphdr);
-    //     exit(EXIT_FAILURE);
+    //     freexit(EXIT_FAILURE);
     // }
 }
