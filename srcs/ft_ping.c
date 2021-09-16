@@ -12,79 +12,16 @@
 
 t_gdata  gdata;
 
-void            free_all()
+void            init()
 {
-    // printf("gdata.res: %p\n", gdata.res);
-    if (gdata.res)
-        freeaddrinfo(gdata.res);
-    // printf("gdata.pkt: %p\n", gdata.pkt);
-    // printf("gdata.pkt->buff: %p\n", gdata.pkt->buff);
-    // if (gdata.pkt && gdata.pkt->buff)
-    //     free((char *)gdata.pkt->buff);
-}
-
-void            freexit(int exit_code)
-{
-    free_all();
-    exit(exit_code);
-}
-
-void            SIGINT_handler()
-{
-    // printf("ctrlc s: %lu\n", (unsigned long)stats.begin_date.tv_sec);
-    // printf("ctrlc s: %lu\n", (unsigned long)gdata.endtime.tv_sec);
-    // printf("ctrlc s diff: %lu\n", (unsigned long)gdata.endtime.tv_sec - (unsigned long)stats.begin_date.tv_sec);
-    // printf("ctrlc ms: %lu\n", stats.begin_date.tv_usec);
-    // printf("ctrlc ms: %lu\n", gdata.endtime.tv_usec);
-    // printf("ctrlc ms diff: %lu\n", gdata.endtime.tv_usec - stats.begin_date.tv_usec);
-
-    gdata.pinging_loop = false;
-}
-
-// int             pinging(struct in_addr addr, const char *ipv4, struct sockaddr_in *ai_res)
-int             pinging(struct in_addr addr)
-{
-    t_pkt               pkt;
-    int                 sktfd;
-    int                 p_seq = 0;
-    struct timeval      nextpktsend_time;
-    struct sockaddr_in  destaddr = (struct sockaddr_in){
-        AF_INET, 42, addr, {0}
-    };
-
-    // printf("Send time: %ld k %ld\n", lastpktsent_time->tv_sec, lastpktsent_time->tv_usec);
-    gdata.pkt = &pkt;
-    sktfd = create_skt();
-    init_pkt(&pkt, &destaddr);
-
-    if (gdata.verbose)
-        printf("Verbose mode on.\n");
-    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
-
-    gdata.start_time = get_time();
-    nextpktsend_time = gdata.start_time;
-    while (gdata.pinging_loop)
-    {
-        // printf("gdata.floodping: %d\n", gdata.floodping);
-        if (gdata.floodping == true || isfirsttimeupper(get_time(), nextpktsend_time))
-        {
-            fill_pkt(&pkt, p_seq);
-            send_pkt(sktfd, &pkt);
-            recv_pkt(sktfd, &gdata.stats, p_seq);
-
-            p_seq++;
-            if (gdata.maxreplies != -1 && p_seq == gdata.maxreplies)
-                break ;
-
-            nextpktsend_time.tv_usec += 1000 * (gdata.dtime_pktsend % 1000);
-            nextpktsend_time.tv_sec += gdata.dtime_pktsend / 1000 + (nextpktsend_time.tv_usec >= 1000000 ? 1 : 0);
-            if (nextpktsend_time.tv_usec >= 1000000)
-                nextpktsend_time.tv_usec -= 1000000;
-        }
-    }
-    gdata.end_time = get_time();
-    close(sktfd);
-    return 0;
+    gdata.pid = getpid();
+    gdata.pinging_loop = true;
+    gdata.dtime_pktsend = 1000;
+    gdata.verbose = false;
+    gdata.floodping = false;
+    gdata.maxreplies = -1;
+    gdata.ttl = TTL;
+    gdata.recv_timeout = RECVTIMEOUTMS;
 }
 
 void            handle_options(char *opt, char *nextopt)
@@ -119,18 +56,6 @@ void            handle_options(char *opt, char *nextopt)
         if (gdata.recv_timeout <= 0)
             printf("Argument for option -W need to be an integer greater than 0, not '%s'\n", nextopt), freexit(EXIT_FAILURE);
     }
-}
-
-void            init()
-{
-    gdata.pid = getpid();
-    gdata.pinging_loop = true;
-    gdata.dtime_pktsend = 1000;
-    gdata.verbose = false;
-    gdata.floodping = false;
-    gdata.maxreplies = -1;
-    gdata.ttl = TTL;
-    gdata.recv_timeout = RECVTIMEOUTMS;
 }
 
 void            parsing(char **argv, int argc)

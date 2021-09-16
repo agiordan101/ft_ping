@@ -14,6 +14,18 @@
 // 	return (struct sockaddr_in *)result->ai_addr;
 // }
 
+void            free_all()
+{
+    if (gdata.res)
+        freeaddrinfo(gdata.res);
+}
+
+void            freexit(int exit_code)
+{
+    free_all();
+    exit(exit_code);
+}
+
 float			ft_abs(float x)
 {
 	return x < 0 ? -x : x;

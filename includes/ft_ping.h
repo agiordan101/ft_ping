@@ -81,12 +81,13 @@ typedef struct      s_gdata
 
 extern t_gdata      gdata;
 
-int     create_skt();
-void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr);
-void    fill_pkt(t_pkt *pkt, int p_seq);
-void    send_pkt(int sktfd, t_pkt *pkt);
-void    recv_pkt(int sktfd, t_statistics *stats, int p_seq);
-void    update_stats(t_statistics *stats);
+int             pinging(struct in_addr addr);
+int             create_skt();
+void            init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr);
+void            fill_pkt(t_pkt *pkt, int p_seq);
+void            send_pkt(int sktfd, t_pkt *pkt);
+void            recv_pkt(int sktfd, t_statistics *stats, int p_seq);
+void            update_stats(t_statistics *stats);
 
 float			ft_abs(float x);
 unsigned short	checksum(unsigned short *data, int len);
@@ -102,5 +103,7 @@ void            print_usage();
 void			print_stats(t_statistics *stats);
 void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);
 
+void            SIGINT_handler();
+void            free_all();
 void            freexit(int exit_code);
 int 			isfirsttimeupper(struct timeval time, struct timeval to_cmp);

@@ -2,11 +2,11 @@
 
 int     create_skt()
 {
-    int sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    int sktfd;
 
-    if (sktfd < 0)
+    if ((sktfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
     {
-        printf("[ERROR] Socket can't be created: \n");
+        printf("[ERROR] Socket can't be created: %d\n", sktfd);
         perror(NULL), freexit(EXIT_FAILURE);
     }
     // printf("Socket fd: %d\n", sktfd);
@@ -23,3 +23,54 @@ int     create_skt()
 
     return sktfd;
 }
+
+void            SIGINT_handler()
+{
+    gdata.pinging_loop = false;
+}
+
+int             pinging(struct in_addr addr)
+{
+    t_pkt               pkt;
+    int                 sktfd;
+    int                 p_seq = 0;
+    struct timeval      nextpktsend_time;
+    struct sockaddr_in  destaddr = (struct sockaddr_in){
+        AF_INET, 42, addr, {0}
+    };
+
+    // printf("Send time: %ld k %ld\n", lastpktsent_time->tv_sec, lastpktsent_time->tv_usec);
+    gdata.pkt = &pkt;
+    sktfd = create_skt();
+    init_pkt(&pkt, &destaddr);
+
+    if (gdata.verbose)
+        printf("Verbose mode on.\n");
+    printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
+
+    gdata.start_time = get_time();
+    nextpktsend_time = gdata.start_time;
+    while (gdata.pinging_loop)
+    {
+        // printf("gdata.floodping: %d\n", gdata.floodping);
+        if (gdata.floodping == true || isfirsttimeupper(get_time(), nextpktsend_time))
+        {
+            fill_pkt(&pkt, p_seq);
+            send_pkt(sktfd, &pkt);
+            recv_pkt(sktfd, &gdata.stats, p_seq);
+
+            p_seq++;
+            if (gdata.maxreplies != -1 && p_seq == gdata.maxreplies)
+                break ;
+
+            nextpktsend_time.tv_usec += 1000 * (gdata.dtime_pktsend % 1000);
+            nextpktsend_time.tv_sec += gdata.dtime_pktsend / 1000 + (nextpktsend_time.tv_usec >= 1000000 ? 1 : 0);
+            if (nextpktsend_time.tv_usec >= 1000000)
+                nextpktsend_time.tv_usec -= 1000000;
+        }
+    }
+    gdata.end_time = get_time();
+    close(sktfd);
+    return 0;
+}
+
