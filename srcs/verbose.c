@@ -95,17 +95,27 @@ void			print_addrinfo(struct addrinfo *addrinfo)
     printf("\n");
 }
 
-void			print_successfull_recv(t_statistics *stats, int recvlen, int ttl)
+void			print_recv_ip(t_statistics *stats, int recvlen, int ttl)
 {
-	printf("%d bytes from ??? (%s): icmp_seq=%d ttl=%d time=%.2f ms\n",
-		recvlen,
+	printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%.1f ms\n",
+		recvlen - IPHDR_SIZE,
 		gdata.ipv4,
 		stats->p_sent,
 		ttl,
 		stats->pkt_dtime
 	);
-	(void)recvlen;
-	(void)stats;
+}
+
+void			print_recv_host(t_statistics *stats, int recvlen, int ttl)
+{
+	printf("%ld bytes from %s (%s): icmp_seq=%d ttl=%d time=%.1f ms\n",
+		recvlen - IPHDR_SIZE,
+		gdata.reversed_hostname,
+		gdata.ipv4,
+		stats->p_sent,
+		ttl,
+		stats->pkt_dtime
+	);
 }
 
 void			print_stats(t_statistics *stats)
@@ -118,12 +128,15 @@ void			print_stats(t_statistics *stats)
         (gdata.end_time.tv_sec - gdata.start_time.tv_sec) * 1000 + (gdata.end_time.tv_usec - gdata.start_time.tv_usec) / 1000
     );
 	// printf("stats->rtt_mdiffsum: %.3f\n", stats->rtt_mdiffsum);
-    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
-        stats->rtt_min,
-        stats->rtt_avg,
-        stats->rtt_max,
-        stats->p_received ? (stats->rtt_mdiffsum / stats->p_received) : 0.
-    );
+    if (stats->p_received)
+		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
+			stats->rtt_min,
+			stats->rtt_avg,
+			stats->rtt_max,
+			stats->p_received ? (stats->rtt_mdiffsum / stats->p_received) : 0.
+		);
+	else
+		printf("\n");
 }
 
 void			print_usage()
@@ -134,7 +147,8 @@ void			print_usage()
 	printf("  -v\t\t\tverbose output\n");
 	printf("  -f\t\t\tflood ping\n");
 	printf("  -c <count>\t\tstop after <count> replies\n");
-	printf("  -i <time>\t\t\twait <time> milliseconds between each packet\n");
-	printf("  -t <ttl>\t\t\tdefine time to live\n");
+	printf("  -i <time>\t\twait <time> milliseconds between each packet\n");
+	printf("  -t <ttl>\t\tdefine time to live\n");
+	printf("  -W <timeout>\t\ttime to wait for response\n");
 	freexit(EXIT_SUCCESS);
 }

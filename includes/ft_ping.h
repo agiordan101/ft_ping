@@ -21,7 +21,7 @@
 
 #define IPHDR_SIZE      sizeof(struct iphdr)
 #define ICMPHDR_SIZE    sizeof(struct icmphdr)
-#define PAYLOAD         "Salut google, ca dis quoi le boss ?"
+#define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"
 #define PAYLOAD_SIZE    sizeof(PAYLOAD)
 // #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE
 #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
@@ -64,8 +64,11 @@ typedef struct      s_gdata
 {
     int             pid;
     char            *hostname;
+    char            reversed_hostname[BUFF_SIZE];
     char            ipv4[INET_ADDRSTRLEN];
     struct addrinfo *res;           // List of internet address
+    struct sockaddr *ai_addr;
+    size_t           ai_addrlen;
     t_pkt           *pkt;
     struct timeval  start_time;     // Program start time
     struct timeval  end_time;       // Program end time
@@ -77,6 +80,7 @@ typedef struct      s_gdata
     int             maxreplies;
     int             recv_timeout;
     int             ttl;
+    void            (*print_recv)(t_statistics *, int, int);
 }                   t_gdata;
 
 extern t_gdata      gdata;
@@ -101,7 +105,8 @@ void			print_addrinfo(struct addrinfo *addrinfo);
 
 void            print_usage();
 void			print_stats(t_statistics *stats);
-void            print_successfull_recv(t_statistics *stats, int recvlen, int ttl);
+void			print_recv_host(t_statistics *stats, int recvlen, int ttl);
+void			print_recv_ip(t_statistics *stats, int recvlen, int ttl);
 
 void            SIGINT_handler();
 void            free_all();

@@ -1,0 +1,8 @@
+PING www.google.com (142.250.179.100) 56(84) bytes of data.
+64 bytes from par21s20-in-f4.1e100.net (142.250.179.100): icmp_seq=1 ttl=114 time=53.0 ms
+64 bytes from par21s20-in-f4.1e100.net (142.250.179.100): icmp_seq=2 ttl=114 time=18.0 ms
+64 bytes from par21s20-in-f4.1e100.net (142.250.179.100): icmp_seq=3 ttl=114 time=15.5 ms
+
+--- www.google.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2015ms
+rtt min/avg/max/mdev = 15.485/28.846/53.023/10.286 ms

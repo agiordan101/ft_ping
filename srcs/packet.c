@@ -136,7 +136,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     {
         stats->p_received++; // Need to increase p_received before update_stats()
         update_stats(stats);
-        print_successfull_recv(stats, recvlen, iphdr->ttl);
+        gdata.print_recv(stats, recvlen, iphdr->ttl);
     }
     // else
     // {

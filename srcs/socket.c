@@ -15,6 +15,7 @@ int     create_skt()
     if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&gdata.ttl, sizeof(gdata.ttl)) < 0)
         perror(NULL), freexit(EXIT_FAILURE);
 
+    // printf("sfbzgb\n");
     // Set receive timeout
     struct timeval rcv_timeout = {gdata.recv_timeout / 1000, 1000 * (gdata.recv_timeout % 1000)};
     // printf("Receive timeout: %ldk%ld\n", rcv_timeout.tv_sec, rcv_timeout.tv_usec);
@@ -44,8 +45,6 @@ int             pinging(struct in_addr addr)
     sktfd = create_skt();
     init_pkt(&pkt, &destaddr);
 
-    if (gdata.verbose)
-        printf("Verbose mode on.\n");
     printf("PING %s (%s) %d(%d) bytes of data.\n", gdata.hostname, gdata.ipv4, 56, 84);
 
     gdata.start_time = get_time();
