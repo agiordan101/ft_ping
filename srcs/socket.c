@@ -9,16 +9,13 @@ int     create_skt()
         printf("[ERROR] Socket can't be created: %d\n", sktfd);
         perror(NULL), freexit(EXIT_FAILURE);
     }
-    // printf("Socket fd: %d\n", sktfd);
  
     // Set max hops socket can makes
     if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&gdata.ttl, sizeof(gdata.ttl)) < 0)
         perror(NULL), freexit(EXIT_FAILURE);
 
-    // printf("sfbzgb\n");
     // Set receive timeout
     struct timeval rcv_timeout = {gdata.recv_timeout / 1000, 1000 * (gdata.recv_timeout % 1000)};
-    // printf("Receive timeout: %ldk%ld\n", rcv_timeout.tv_sec, rcv_timeout.tv_usec);
     if (setsockopt(sktfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&rcv_timeout, sizeof(rcv_timeout)) < 0)
         perror(NULL), freexit(EXIT_FAILURE);
 
@@ -40,7 +37,6 @@ int             pinging(struct in_addr addr)
         AF_INET, 42, addr, {0}
     };
 
-    // printf("Send time: %ld k %ld\n", lastpktsent_time->tv_sec, lastpktsent_time->tv_usec);
     gdata.pkt = &pkt;
     sktfd = create_skt();
     init_pkt(&pkt, &destaddr);
@@ -51,7 +47,6 @@ int             pinging(struct in_addr addr)
     nextpktsend_time = gdata.start_time;
     while (gdata.pinging_loop)
     {
-        // printf("gdata.floodping: %d\n", gdata.floodping);
         if (gdata.floodping == true || isfirsttimeupper(get_time(), nextpktsend_time))
         {
             fill_pkt(&pkt, p_seq);

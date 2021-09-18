@@ -18,33 +18,33 @@ void            init()
 
 void            handle_options(char *opt, char *nextopt)
 {
-    if (!strcmp(opt, "-h"))
+    if (!ft_strcmp(opt, "-h"))
         print_usage();
-    else if (!strcmp(opt, "-v"))
+    else if (!ft_strcmp(opt, "-v"))
         gdata.verbose = true;
-    else if (!strcmp(opt, "-f"))
+    else if (!ft_strcmp(opt, "-f"))
         gdata.floodping = true;
-    else if (!strcmp(opt, "-c") && nextopt)
+    else if (!ft_strcmp(opt, "-c") && nextopt)
     {
-        gdata.maxreplies = atoi(nextopt);
+        gdata.maxreplies = ft_atoi(nextopt);
         if (gdata.maxreplies <= 0)
             printf("Argument for option -c need to be an integer greater than 0, not '%s'\n", nextopt), freexit(EXIT_FAILURE);
     }
-    else if (!strcmp(opt, "-i") && nextopt)
+    else if (!ft_strcmp(opt, "-i") && nextopt)
     {
-        gdata.dtime_pktsend = atoi(nextopt);
+        gdata.dtime_pktsend = ft_atoi(nextopt);
         if (gdata.dtime_pktsend <= 0)
             printf("Argument for option -i need to be an integer greater than 0, not '%s'\n", nextopt), freexit(EXIT_FAILURE);
     }
-    else if (!strcmp(opt, "-t") && nextopt)
+    else if (!ft_strcmp(opt, "-t") && nextopt)
     {
-        gdata.ttl = atoi(nextopt);
+        gdata.ttl = ft_atoi(nextopt);
         if (gdata.ttl <= 0)
             printf("Argument for option -t need to be an integer greater than 0, not '%s'\n", nextopt), freexit(EXIT_FAILURE);
     }
-    else if (!strcmp(opt, "-W") && nextopt)
+    else if (!ft_strcmp(opt, "-W") && nextopt)
     {
-        gdata.recv_timeout = atoi(nextopt);
+        gdata.recv_timeout = ft_atoi(nextopt);
         if (gdata.recv_timeout <= 0)
             printf("Argument for option -W need to be an integer greater than 0, not '%s'\n", nextopt), freexit(EXIT_FAILURE);
     }
@@ -70,8 +70,7 @@ void	    get_reversed_hostname()
     int ret;
 	if ((ret = getnameinfo(gdata.ai_addr, gdata.ai_addrlen,
 		gdata.reversed_hostname, sizeof(gdata.reversed_hostname), NULL, 0, NI_NAMEREQD)) < 0)
-        perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d / %d): %s\n", gdata.reversed_hostname, ret, EAI_FAMILY, gdata.ipv4), freexit(EXIT_FAILURE);
-    // printf("Reversed hostname: %s\n", gdata.reversed_hostname);
+        perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d): %s\n", gdata.reversed_hostname, ret, gdata.ipv4), freexit(EXIT_FAILURE);
 }
 
 void      get_addr(struct in_addr *addr)
@@ -92,16 +91,12 @@ void      get_addr(struct in_addr *addr)
         if (res->ai_socktype == SOCK_RAW &&
             res->ai_family == AF_INET)
         {
-            // printf("Find right struct\n");
             gdata.ai_addr = res->ai_addr;
             gdata.ai_addrlen = res->ai_addrlen;
             struct sockaddr_in *sockaddr_in = (struct sockaddr_in *)res->ai_addr;
-            // printf("sockaddr_in->sin_family: %d\n", sockaddr_in->sin_family);
-            // printf("sockaddr_in->sin_port: %d\n", sockaddr_in->sin_port);
-            // print_addrinfo(res);
             if (sockaddr_in)
             {
-                memcpy(addr, &sockaddr_in->sin_addr, sizeof(sockaddr_in->sin_addr));
+                ft_memcpy(addr, &sockaddr_in->sin_addr, sizeof(sockaddr_in->sin_addr));
                 return ;
             }
         }
@@ -135,7 +130,7 @@ int             main(int argc, char **argv)
     inet_ntop(AF_INET, &addr, gdata.ipv4, INET_ADDRSTRLEN);
 
     // Switch between hotsname and ipv4 input
-    if (strcmp(gdata.hostname, gdata.ipv4))
+    if (ft_strcmp(gdata.hostname, gdata.ipv4))
         get_reversed_hostname();
     else
         gdata.print_recv = print_recv_ip;

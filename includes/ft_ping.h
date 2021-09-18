@@ -1,46 +1,35 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <errno.h>
-#include <netdb.h>
-#include <signal.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <stdbool.h>
+# include <unistd.h>
+# include <errno.h>
+# include <netdb.h>
+# include <signal.h>
 
-#include <sys/uio.h>
-#include <sys/time.h>
-#include <sys/socket.h>
+# include <sys/uio.h>
+# include <sys/time.h>
+# include <sys/socket.h>
 
-#include <linux/icmp.h> // Need both
-#include <netinet/ip.h>
-// #include <netinet/icmp.h>
+# include <linux/icmp.h> // Need both
+# include <netinet/ip.h>
 
-#include <arpa/inet.h>
+# include <arpa/inet.h>
 
-// # define ABS(x)         (x < 0 ? -x : x)
+# define IPHDR_SIZE      sizeof(struct iphdr)
+# define ICMPHDR_SIZE    sizeof(struct icmphdr)
+# define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"
+# define PAYLOAD_SIZE    sizeof(PAYLOAD)
+# define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
+# define BUFF_SIZE       42
 
-#define IPHDR_SIZE      sizeof(struct iphdr)
-#define ICMPHDR_SIZE    sizeof(struct icmphdr)
-#define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"
-#define PAYLOAD_SIZE    sizeof(PAYLOAD)
-// #define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE
-#define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
-
-# define TTL            60
-# define RECVTIMEOUTMS  1000
-# define DTIMEPKT       1000
-
-# define BUFF_SIZE      420 //42?
-// #define SKTOPT_LVL      IPPROTO_ICMP
-// #define SKTOPT_LVL      IPPROTO_IP
-// #define SKTOPT_LVL      SOL_SOCKET
-// #define SKTOPT_LVL         SOL_RAW
-// #define SKTOPT_LVL         SOL_IP
+# define TTL             60
+# define RECVTIMEOUTMS   1000
+# define DTIMEPKT        1000
 
 typedef struct      s_pkt
 {
 	char			buff[ICMPHDR_SIZE + PAYLOAD_SIZE];      //Buffer with headers and payload
-	// struct iphdr    *iphdr;
 	struct icmphdr  *icmphdr;   // Point into buff
     char            *payload;   // Point into buff
     struct sockaddr *daddr;     //Destination address
@@ -80,7 +69,7 @@ typedef struct      s_gdata
     int             maxreplies;
     int             recv_timeout;
     int             ttl;
-    void            (*print_recv)(t_statistics *, int, int);
+    void            (*print_recv)(t_statistics *, int, int);    // Different print function depending on hostname or ipv4 input
 }                   t_gdata;
 
 extern t_gdata      gdata;
@@ -95,7 +84,6 @@ void            update_stats(t_statistics *stats);
 
 float			ft_abs(float x);
 unsigned short	checksum(unsigned short *data, int len);
-// struct sockaddr_in  *get_addrinfo(char *hostname);
 
 struct timeval  get_time();
 void			print_iphdr(struct iphdr *iphdr);
@@ -112,3 +100,8 @@ void            SIGINT_handler();
 void            free_all();
 void            freexit(int exit_code);
 int 			isfirsttimeupper(struct timeval time, struct timeval to_cmp);
+
+size_t          ft_strlenbin(char *str);
+int             ft_atoi(const char *str);
+int             ft_strcmp(const char *s1, const char *s2);
+void	        *ft_memcpy(void *dest, const void *src, size_t n);

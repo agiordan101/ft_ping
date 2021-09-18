@@ -1,48 +1,36 @@
 #include "ft_ping.h"
 
+/*
+	USELESS FUNCTIONS - HELP TO DEBUG
+*/
+
 void			print_msghdr(struct msghdr *msghdr)
 {
 	char	buff[1024];
-	int		rw = -1;
 
 	printf("msghdr: %p\n", msghdr);
 
 	// msg_name
 	bzero(buff, sizeof(buff));
-	memcpy(buff, msghdr->msg_name, msghdr->msg_namelen);
+	ft_memcpy(buff, msghdr->msg_name, msghdr->msg_namelen);
     printf("msghdr->msg_name (len=%d): >%s<\n", msghdr->msg_namelen, buff);
-    // printf("msghdr->msg_name (len=%d): >\n", msghdr->msg_namelen);
-	// rw = write(1, (char *)msghdr->msg_name, msghdr->msg_namelen);
-	// printf("<\n");
 
 	// msg_iov
     printf("msghdr->msg_iovlen: %ld\n", msghdr->msg_iovlen);
-    int i = 0;
-    while (i < (int)msghdr->msg_iovlen)
+    int i = -1;
+    while (++i < (int)msghdr->msg_iovlen)
     {
         bzero(buff, sizeof(buff));
-        memcpy(buff, msghdr->msg_iov[i].iov_base, msghdr->msg_iov[i].iov_len);
+        ft_memcpy(buff, msghdr->msg_iov[i].iov_base, msghdr->msg_iov[i].iov_len);
         printf(" - msghdr->msgiov[%d].iov_base (len=%d): >%s<\n", i, (int)msghdr->msg_iov[i].iov_len, buff);
-
-		// printf(" - msghdr->msg_iov[%d].iov_base (len=%ld): >\n", i, msghdr->msg_iov[i].iov_len);
-		// rw = write(1, msghdr->msg_iov[i].iov_base, msghdr->msg_iov[i].iov_len);
-		// printf("<\n");
-
-		i++;
     }
 
 	// msg_control
 	bzero(buff, sizeof(buff));
-	memcpy(buff, msghdr->msg_control, msghdr->msg_controllen);
+	ft_memcpy(buff, msghdr->msg_control, msghdr->msg_controllen);
     printf("msghdr.msg_control (len=%ld): >%s<\n", msghdr->msg_controllen, buff);
-    // printf("msghdr->msg_control (len=%ld): >\n", msghdr->msg_controllen);
-	// rw = write(1, msghdr->msg_control, msghdr->msg_controllen);
-	// printf("<\n");
-
 	printf("msghdr->msg_flags: %d\n", msghdr->msg_flags);
     printf("\n");
-	(void)rw;
-	(void)buff;
 }
 
 void			print_iphdr(struct iphdr *iphdr)
@@ -94,6 +82,10 @@ void			print_addrinfo(struct addrinfo *addrinfo)
 	printf("addrinfo->ai_next: %p\n", addrinfo->ai_next);
     printf("\n");
 }
+
+/*
+	FUNCTIONS USE IN THIS PROJECT
+*/
 
 void			print_recv_ip(t_statistics *stats, int recvlen, int ttl)
 {

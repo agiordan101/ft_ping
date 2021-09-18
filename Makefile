@@ -15,6 +15,7 @@ SRC			=	$(NAME).c	\
 				socket.c \
 				packet.c \
 				utils.c \
+				libft.c \
 				verbose.c
 
 BIN_PATH	=	./bins/

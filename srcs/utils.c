@@ -1,19 +1,5 @@
 #include "ft_ping.h"
 
-// struct sockaddr_in  *get_addrinfo(char *hostname)
-// {
-// 	struct addrinfo hints;
-// 	struct addrinfo *result;
-
-// 	bzero(&hints, sizeof(hints));
-// 	hints.ai_family = AF_INET;
-// 	hints.ai_socktype = SOCK_RAW;
-// 	hints.ai_protocol = IPPROTO_ICMP;
-// 	if (getaddrinfo(hostname, NULL, &hints, &result) != 0)
-// 		return (NULL);
-// 	return (struct sockaddr_in *)result->ai_addr;
-// }
-
 void            free_all()
 {
     if (gdata.res)
@@ -24,11 +10,6 @@ void            freexit(int exit_code)
 {
     free_all();
     exit(exit_code);
-}
-
-float			ft_abs(float x)
-{
-	return x < 0 ? -x : x;
 }
 
 unsigned short	checksum(unsigned short *data, int len)
