@@ -12,10 +12,14 @@
 # include <sys/socket.h>
 
 # include <linux/icmp.h> // Need both
+// # include "icmp.h"
 # include <netinet/ip.h>
+// # include <netinet/ip_icmp.h>
 
 # include <arpa/inet.h>
 
+// # define IPHDR_SIZE      sizeof(struct ip)
+// # define ICMPHDR_SIZE    sizeof(struct icmp)
 # define IPHDR_SIZE      sizeof(struct iphdr)
 # define ICMPHDR_SIZE    sizeof(struct icmphdr)
 # define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"
@@ -30,6 +34,7 @@
 typedef struct      s_pkt
 {
 	char			buff[ICMPHDR_SIZE + PAYLOAD_SIZE];      //Buffer with headers and payload
+	// struct icmp  *icmphdr;   // Point into buff
 	struct icmphdr  *icmphdr;   // Point into buff
     char            *payload;   // Point into buff
     struct sockaddr *daddr;     //Destination address
@@ -86,9 +91,11 @@ float			ft_abs(float x);
 unsigned short	checksum(unsigned short *data, int len);
 
 struct timeval  get_time();
+// void			print_iphdr(struct ip *iphdr);
+// void			print_icmphdr(struct icmp *icmphdr);
 void			print_iphdr(struct iphdr *iphdr);
-void			print_msghdr(struct msghdr *msghdr);
 void			print_icmphdr(struct icmphdr *icmphdr);
+void			print_msghdr(struct msghdr *msghdr);
 void			print_addrinfo(struct addrinfo *addrinfo);
 
 void            print_usage();

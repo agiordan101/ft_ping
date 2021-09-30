@@ -84,7 +84,7 @@ void			print_addrinfo(struct addrinfo *addrinfo)
 }
 
 /*
-	FUNCTIONS USE IN THIS PROJECT
+	FUNCTIONS USED IN THIS PROJECT
 */
 
 void			print_recv_ip(t_statistics *stats, int recvlen, int ttl)
