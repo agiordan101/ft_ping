@@ -96,10 +96,10 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
 
-    printf("recvlen: %d\n", recvlen);
-    // printf("PKTSIZE: %ld\n", PKTSIZE);
-    // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE);
-    printf("iphdr->ihl: %d\n", iphdr->ihl);
+    // printf("recvlen: %d\n", recvlen);
+    printf("PKTSIZE: %ld\n", PKTSIZE);
+    printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE);
+    // printf("iphdr->ihl: %d\n", iphdr->ihl);
     // printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
     // printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
     printf("gdata.pid : %d\tp_seq: %d\t\n", gdata.pid , p_seq);
