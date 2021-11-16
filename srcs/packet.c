@@ -80,7 +80,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     recvlen = recvmsg(sktfd, &msghdr, MSG_WAITALL);
     stats->pktrecv_time = get_time();
 
-    printf("recvlen: %s\n", recvlen);
+    printf("recvlen: %d\n", recvlen);
     if (recvlen == -1)
     {
         if (gdata.pinging_loop == false)
