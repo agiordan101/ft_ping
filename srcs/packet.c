@@ -68,6 +68,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     struct iovec        msgiov;
     int                 recvlen = -1;
 
+    printf("sizeof(recvbuff): %ld\n", sizeof(recvbuff));
     ft_bzero(recvbuff, sizeof(recvbuff));
     msgiov = (struct iovec){&recvbuff, sizeof(recvbuff)};
 
