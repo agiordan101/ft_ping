@@ -92,6 +92,8 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
 
+    printf("recvlen: %d\n", recvlen);
+    printf("icmphdr->type: %d\ticmphdr->code: %d\t\n", icmphdr->type, icmphdr->code);
     if (icmphdr->type == ICMP_ECHOREPLY &&
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
@@ -102,6 +104,4 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         update_stats(stats);
         gdata.print_recv(stats, recvlen, iphdr->ttl);
     }
-    else
-        printf("recvlen: %d\n", recvlen);
 }
