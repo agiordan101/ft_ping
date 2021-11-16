@@ -68,7 +68,10 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     struct iovec        msgiov;
     int                 recvlen = -1;
 
+    // printf("sizeof(recvbuff): %ld\n", sizeof(recvbuff));
+    // ft_bzero(recvbuff, PKTSIZE);
     msgiov = (struct iovec){&recvbuff, PKTSIZE};
+    // msgiov = (struct iovec){&recvbuff, sizeof(recvbuff)};
 
     msghdr = (struct msghdr){
         (void *)&namebuff, sizeof(namebuff),
@@ -88,10 +91,19 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
             return ;
     }
 
+
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
 
+    printf("recvlen: %d\n", recvlen);
+    printf("PKTSIZE: %ld\n", PKTSIZE);
+    printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE);
+    printf("iphdr->ihl: %d\n", iphdr->ihl);
+    printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
+    printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
+    printf("gdata.pid : %d\tp_seq: %d\t\n", gdata.pid , p_seq);
+    printf("payload: %s (len=%ld)\tPAYLOAD: %s (len=%ld)\n", payload, strlen(payload), PAYLOAD, strlen(PAYLOAD));
     if (icmphdr->type == ICMP_ECHOREPLY &&
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
