@@ -4,7 +4,7 @@
 NAME		=	ft_ping
 
 CC			=	gcc
-CFLAGS		+=	-fPIC -Wall -Werror -Wextra -O3
+CFLAGS		+=	-fPIC -Wall -Werror -Wextra -O3 -g
 
 INC_PATH		=	./includes/
 INCLUDES	=	$(NAME).h	\
