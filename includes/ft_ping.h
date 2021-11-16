@@ -11,15 +11,12 @@
 # include <sys/time.h>
 # include <sys/socket.h>
 
-# include <linux/icmp.h> // Need both
-// # include "icmp.h"
+# include <netinet/in.h>
 # include <netinet/ip.h>
-// # include <netinet/ip_icmp.h>
+# include <netinet/ip_icmp.h>
 
 # include <arpa/inet.h>
 
-// # define IPHDR_SIZE      sizeof(struct ip)
-// # define ICMPHDR_SIZE    sizeof(struct icmp)
 # define IPHDR_SIZE      sizeof(struct iphdr)
 # define ICMPHDR_SIZE    sizeof(struct icmphdr)
 # define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"

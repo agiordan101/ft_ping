@@ -9,7 +9,7 @@ int     create_skt()
         printf("[ERROR] Socket can't be created: %d\n", sktfd);
         perror(NULL), freexit(EXIT_FAILURE);
     }
- 
+
     // Set max hops socket can makes
     if (setsockopt(sktfd, IPPROTO_IP, IP_TTL, (char *)&gdata.ttl, sizeof(gdata.ttl)) < 0)
         perror(NULL), freexit(EXIT_FAILURE);
