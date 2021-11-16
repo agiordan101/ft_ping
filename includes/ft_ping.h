@@ -21,7 +21,7 @@
 # define ICMPHDR_SIZE    sizeof(struct icmphdr)
 # define PAYLOAD         "3.14159265358979323846264338327950288419716939937510582"
 # define PAYLOAD_SIZE    sizeof(PAYLOAD)
-# define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE
+# define PKTSIZE         IPHDR_SIZE + ICMPHDR_SIZE + PAYLOAD_SIZE - 1 //-1 because PAYLOAD is a string
 # define BUFF_SIZE       42
 
 # define TTL             60
