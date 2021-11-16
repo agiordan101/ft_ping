@@ -108,4 +108,5 @@ int 			isfirsttimeupper(struct timeval time, struct timeval to_cmp);
 size_t          ft_strlenbin(char *str);
 int             ft_atoi(const char *str);
 int             ft_strcmp(const char *s1, const char *s2);
+void        	ft_bzero(void *s, size_t n);
 void	        *ft_memcpy(void *dest, const void *src, size_t n);

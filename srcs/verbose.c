@@ -102,7 +102,7 @@ void			print_recv_host(t_statistics *stats, int recvlen, int ttl)
 {
 	printf("%ld bytes from %s (%s): icmp_seq=%d ttl=%d time=%.1f ms\n",
 		recvlen - IPHDR_SIZE,
-		gdata.reversed_hostname,
+		gdata.reversed_hostname ? gdata.reversed_hostname : gdata.ipv4,
 		gdata.ipv4,
 		stats->p_sent,
 		ttl,
