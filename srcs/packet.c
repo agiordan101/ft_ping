@@ -100,7 +100,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     // printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
     // printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
     // printf("gdata.pid : %d\tp_seq: %d\t\n", gdata.pid , p_seq);
-    printf("payload: %s (len=%ld)\tPAYLOAD: %s\n", payload, strlen(payload), PAYLOAD);
+    printf("payload: %s (len=%ld)\tPAYLOAD: %s (len=%ld)\n", payload, strlen(payload), PAYLOAD, strlen(PAYLOAD));
     if (icmphdr->type == ICMP_ECHOREPLY &&
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
