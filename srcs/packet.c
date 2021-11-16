@@ -95,6 +95,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
 
     printf("iphdr->ihl: %d\n", iphdr->ihl);
+    printf("PKTSIZE: %d\n", PKTSIZE);
     printf("recvlen: %d\n", recvlen);
     // printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
     // printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
