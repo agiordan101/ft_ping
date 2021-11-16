@@ -69,7 +69,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     int                 recvlen = -1;
 
     // printf("sizeof(recvbuff): %ld\n", sizeof(recvbuff));
-    // ft_bzero(recvbuff, PKTSIZE);
+    ft_bzero(recvbuff, PKTSIZE);
     msgiov = (struct iovec){&recvbuff, PKTSIZE};
     // msgiov = (struct iovec){&recvbuff, sizeof(recvbuff)};
 
@@ -94,7 +94,10 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
-    char *payload = (char *)icmphdr + ICMPHDR_SIZE;
+
+    char payload[PAYLOAD];
+    ft_bzero(recvbuff, PKTSIZE);
+    ft_memcpy(payload, (char *)icmphdr + ICMPHDR_SIZE, PAYLOAD_SIZE);
 
     // printf("recvlen: %d\n", recvlen);
     // printf("PKTSIZE: %ld\n", PKTSIZE);
