@@ -70,8 +70,8 @@ void	    get_reversed_hostname()
     int ret;
 	if ((ret = getnameinfo(gdata.ai_addr, gdata.ai_addrlen,
 		gdata.reversed_hostname, sizeof(gdata.reversed_hostname), NULL, 0, NI_NAMEREQD)) < 0)
-        ft_bzero(gdata.reversed_hostname, BUFF_SIZE);
-        // perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d): %s\n", gdata.reversed_hostname, ret, gdata.ipv4), freexit(EXIT_FAILURE);
+        // ft_bzero(gdata.reversed_hostname, BUFF_SIZE);
+        perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d): %s\n", gdata.reversed_hostname, ret, gdata.ipv4), freexit(EXIT_FAILURE);
 }
 
 void      get_addr(struct in_addr *addr)
