@@ -97,7 +97,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     char payload[PAYLOAD_SIZE + 1];
     ft_bzero(payload, PAYLOAD_SIZE + 1);
-    ft_memcpy(payload, (char *)icmphdr + 20, 56);
+    ft_memcpy(payload, (char *)icmphdr + ICMPHDR_SIZE, PAYLOAD_SIZE);
 
     // printf("recvlen: %d\n", recvlen);
     // printf("PKTSIZE: %ld\n", PKTSIZE);
