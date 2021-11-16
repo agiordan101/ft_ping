@@ -12,7 +12,6 @@ void            init()
     gdata.maxreplies = -1;
     gdata.ttl = TTL;
     gdata.recv_timeout = RECVTIMEOUTMS;
-    // ft_bzero(gdata.reversed_hostname, BUFF_SIZE);
     gdata.reversed_hostname[0] = '?';
     gdata.print_recv = print_recv_host;
 }
@@ -71,9 +70,9 @@ void	    get_reversed_hostname()
     int ret;
 	if ((ret = getnameinfo(gdata.ai_addr, gdata.ai_addrlen,
 		gdata.reversed_hostname, sizeof(gdata.reversed_hostname), NULL, 0, NI_NAMEREQD)) < 0)
-        return ;
-        // ft_bzero(gdata.reversed_hostname, BUFF_SIZE);
-        perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d): %s\n", gdata.reversed_hostname, ret, gdata.ipv4), freexit(EXIT_FAILURE);
+        // return ;
+        ft_bzero(gdata.reversed_hostname, BUFF_SIZE);
+        // perror(NULL), printf("[ERROR] Unable to fetch reversed hostname (%s) of ipv4 addr (error code %d): %s\n", gdata.reversed_hostname, ret, gdata.ipv4), freexit(EXIT_FAILURE);
 }
 
 void      get_addr(struct in_addr *addr)
