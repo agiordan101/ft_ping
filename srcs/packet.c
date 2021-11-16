@@ -63,7 +63,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 {
     struct msghdr       msghdr;
     char                namebuff[BUFF_SIZE];
-    char                recvbuff[PKTSIZE];
+    char                recvbuff[PKTSIZE - 1];
     char                controlbuff[BUFF_SIZE];
     struct iovec        msgiov;
     int                 recvlen = -1;
