@@ -94,6 +94,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
     payload[PAYLOAD_SIZE] = '\0';
 
+    printf("Payload received: >%d<\n", payload);
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
     // printf("PAYLOAD_SIZE: %ld\n", PAYLOAD_SIZE); 
