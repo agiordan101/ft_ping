@@ -119,7 +119,6 @@ void			print_stats(t_statistics *stats)
         stats->p_sent ? (100.0 * (stats->p_sent - stats->p_received) / (float)stats->p_sent) : 0,
         (gdata.end_time.tv_sec - gdata.start_time.tv_sec) * 1000 + (gdata.end_time.tv_usec - gdata.start_time.tv_usec) / 1000
     );
-	// printf("stats->rtt_mdiffsum: %.3f\n", stats->rtt_mdiffsum);
     if (stats->p_received)
 		printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
 			stats->rtt_min,
