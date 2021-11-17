@@ -97,11 +97,11 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     char *p = (char *)icmphdr + ICMPHDR_SIZE;
     p[PAYLOAD_SIZE] = '\0';
 
-    char payload[PAYLOAD_SIZE + 1];
-    ft_bzero(payload, PAYLOAD_SIZE + 1);
+    // char payload[PAYLOAD_SIZE + 1];
+    // ft_bzero(payload, PAYLOAD_SIZE + 1);
+    // ft_memcpy(payload, p, PAYLOAD_SIZE);
     // printf("payload size: %ld\n", ft_strlenbin(payload));
     // printf("p: %s\n", p);
-    ft_memcpy(payload, p, PAYLOAD_SIZE);
 
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
@@ -116,7 +116,8 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
         icmphdr->un.echo.sequence <= p_seq &&
-        !ft_strcmp(payload, PAYLOAD))
+        !ft_strcmp(p, PAYLOAD))
+        // !ft_strcmp(payload, PAYLOAD))
     {
         stats->p_received++; // Need to increase p_received before update_stats()
         update_stats(stats);
