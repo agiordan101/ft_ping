@@ -5,9 +5,6 @@ void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
     // Data set one time for all packets
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
     pkt->payload = pkt->buff + ICMPHDR_SIZE;
-
-    // ft_bzero(pkt->payload, PAYLOAD_SIZE);
-    pkt->payload[PAYLOAD_SIZE] = '\0';
     ft_memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
 
     pkt->icmphdr->type = ICMP_ECHO;
@@ -37,7 +34,12 @@ void    send_pkt(int sktfd, t_pkt *pkt)
     else
     {
         if (gdata.verbose)
-            printf("\nPayload sent     => >%s<\n", pkt->payload);
+        {
+            char p[PAYLOAD_SIZE];
+            ft_bzero(p, PAYLOAD_SIZE + 1);
+            ft_memcpy(p, pkt->payload, PAYLOAD_SIZE);
+            printf("\nPayload sent     => >%s<\n", p);
+        }
         gdata.stats.pktsend_time = get_time();
         gdata.stats.p_sent++;
     }
