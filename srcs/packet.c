@@ -91,10 +91,12 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
+
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
     payload[PAYLOAD_SIZE] = '\0';
+    if (gdata.verbose)
+        printf("Payload received: >%s<\n", payload);
 
-    printf("Payload received: >%d<\n", payload);
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
     // printf("PAYLOAD_SIZE: %ld\n", PAYLOAD_SIZE); 
