@@ -94,11 +94,13 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
+    char *p = (char *)icmphdr + ICMPHDR_SIZE;
 
     char payload[PAYLOAD_SIZE + 1];
     ft_bzero(payload, PAYLOAD_SIZE + 1);
     printf("payload size: %ld\n", ft_strlenbin(payload));
-    // ft_memcpy(payload, (char *)icmphdr + ICMPHDR_SIZE, PAYLOAD_SIZE);
+    printf("p: %s\n", p);
+    ft_memcpy(payload, p, PAYLOAD_SIZE);
 
     printf("recvlen: %d\n", recvlen);
     printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
