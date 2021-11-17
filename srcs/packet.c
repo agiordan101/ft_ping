@@ -32,6 +32,8 @@ void    send_pkt(int sktfd, t_pkt *pkt)
         perror(NULL), freexit(EXIT_FAILURE);
     else
     {
+        if (gdata.verbose)
+            printf("Payload sent   =>   >%s<\n", pkt->payload);
         gdata.stats.pktsend_time = get_time();
         gdata.stats.p_sent++;
     }
@@ -95,7 +97,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
     payload[PAYLOAD_SIZE] = '\0';
     if (gdata.verbose)
-        printf("Payload received: >%s<\n", payload);
+        printf("Payload received => >%s<\n", payload);
 
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
