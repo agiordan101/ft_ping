@@ -6,7 +6,7 @@ void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
     pkt->payload = pkt->buff + ICMPHDR_SIZE;
 
-    ft_bzero(pkt->payload, PAYLOAD_SIZE + 1);
+    ft_bzero(pkt->payload, PAYLOAD_SIZE);
     ft_memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
 
     pkt->icmphdr->type = ICMP_ECHO;
