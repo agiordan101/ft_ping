@@ -6,7 +6,8 @@ void    init_pkt(t_pkt *pkt, struct sockaddr_in *destaddr)
     pkt->icmphdr = (struct icmphdr *)pkt->buff;
     pkt->payload = pkt->buff + ICMPHDR_SIZE;
 
-    ft_bzero(pkt->payload, PAYLOAD_SIZE);
+    // ft_bzero(pkt->payload, PAYLOAD_SIZE);
+    pkt->payload[PAYLOAD_SIZE] = '\0';
     ft_memcpy(pkt->payload, PAYLOAD, PAYLOAD_SIZE);
 
     pkt->icmphdr->type = ICMP_ECHO;
@@ -36,7 +37,7 @@ void    send_pkt(int sktfd, t_pkt *pkt)
     else
     {
         if (gdata.verbose)
-            printf("\nPayload sent   =>   >%s<\n", pkt->payload);
+            printf("\nPayload sent     => >%s<\n", pkt->payload);
         gdata.stats.pktsend_time = get_time();
         gdata.stats.p_sent++;
     }
@@ -99,8 +100,6 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     char *payload = (char *)icmphdr + ICMPHDR_SIZE;
     payload[PAYLOAD_SIZE] = '\0';
-    if (gdata.verbose)
-        printf("Payload received => >%s<\n", payload);
 
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
@@ -120,5 +119,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         stats->p_received++; // Need to increase p_received before update_stats()
         update_stats(stats);
         gdata.print_recv(stats, recvlen, iphdr->ttl);
+        if (gdata.verbose)
+            printf("Payload received => >%s<\n", payload);
     }
 }
