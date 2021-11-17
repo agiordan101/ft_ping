@@ -68,10 +68,8 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     struct iovec        msgiov;
     int                 recvlen = -1;
 
-    // printf("sizeof(recvbuff): %ld\n", sizeof(recvbuff));
     ft_bzero(recvbuff, PKTSIZE);
     msgiov = (struct iovec){&recvbuff, PKTSIZE};
-    // msgiov = (struct iovec){&recvbuff, sizeof(recvbuff)};
 
     msghdr = (struct msghdr){
         (void *)&namebuff, sizeof(namebuff),
@@ -91,17 +89,10 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
             return ;
     }
 
-
     struct iphdr *iphdr = (struct iphdr *)recvbuff;
     struct icmphdr *icmphdr = (struct icmphdr *)(recvbuff + (iphdr->ihl * 4));
-    char *p = (char *)icmphdr + ICMPHDR_SIZE;
-    p[PAYLOAD_SIZE] = '\0';
-
-    // char payload[PAYLOAD_SIZE + 1];
-    // ft_bzero(payload, PAYLOAD_SIZE + 1);
-    // ft_memcpy(payload, p, PAYLOAD_SIZE);
-    // printf("payload size: %ld\n", ft_strlenbin(payload));
-    // printf("p: %s\n", p);
+    char *payload = (char *)icmphdr + ICMPHDR_SIZE;
+    payload[PAYLOAD_SIZE] = '\0';
 
     // printf("recvlen: %d\n", recvlen);
     // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
@@ -116,8 +107,7 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
         icmphdr->un.echo.sequence <= p_seq &&
-        !ft_strcmp(p, PAYLOAD))
-        // !ft_strcmp(payload, PAYLOAD))
+        !ft_strcmp(payload, PAYLOAD))
     {
         stats->p_received++; // Need to increase p_received before update_stats()
         update_stats(stats);
