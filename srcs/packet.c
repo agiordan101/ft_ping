@@ -118,10 +118,10 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
         icmphdr->un.echo.sequence <= p_seq &&
         !ft_strcmp(payload, PAYLOAD))
     {
+        if (gdata.verbose)
+            printf("Payload received => >%s<\n", payload);
         stats->p_received++; // Need to increase p_received before update_stats()
         update_stats(stats);
         gdata.print_recv(stats, recvlen, iphdr->ttl);
-        if (gdata.verbose)
-            printf("Payload received => >%s<\n", payload);
     }
 }
