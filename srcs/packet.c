@@ -100,8 +100,9 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
     ft_memcpy(payload, (char *)icmphdr + ICMPHDR_SIZE, PAYLOAD_SIZE);
 
     printf("recvlen: %d\n", recvlen);
+    printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
+    printf("PAYLOAD_SIZE: %ld\n", PAYLOAD_SIZE); 
     printf("PKTSIZE: %ld\n", PKTSIZE);
-    printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE);
     printf("iphdr->ihl: %d\n", iphdr->ihl);
     printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
     printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
