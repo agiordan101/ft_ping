@@ -98,19 +98,19 @@ void    recv_pkt(int sktfd, t_statistics *stats, int p_seq)
 
     char payload[PAYLOAD_SIZE + 1];
     ft_bzero(payload, PAYLOAD_SIZE + 1);
-    printf("payload size: %ld\n", ft_strlenbin(payload));
-    printf("p: %s\n", p);
+    // printf("payload size: %ld\n", ft_strlenbin(payload));
+    // printf("p: %s\n", p);
     ft_memcpy(payload, p, PAYLOAD_SIZE);
 
-    printf("recvlen: %d\n", recvlen);
-    printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
-    printf("PAYLOAD_SIZE: %ld\n", PAYLOAD_SIZE); 
-    printf("PKTSIZE: %ld\n", PKTSIZE);
-    printf("iphdr->ihl: %d\n", iphdr->ihl);
-    printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
-    printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
-    printf("gdata.pid : %d\tp_seq: %d\t\n", gdata.pid , p_seq);
-    printf("payload: %s (len=%ld)\tPAYLOAD: %s (len=%ld)\n", payload, strlen(payload), PAYLOAD, strlen(PAYLOAD));
+    // printf("recvlen: %d\n", recvlen);
+    // printf("ICMPHDR_SIZE: %ld\n", ICMPHDR_SIZE); 
+    // printf("PAYLOAD_SIZE: %ld\n", PAYLOAD_SIZE); 
+    // printf("PKTSIZE: %ld\n", PKTSIZE);
+    // printf("iphdr->ihl: %d\n", iphdr->ihl);
+    // printf("icmphdr->type: %d = %d\ticmphdr->code: %d\t\n", icmphdr->type, ICMP_ECHOREPLY, icmphdr->code);
+    // printf("icmphdr->un.echo.id: %d\ticmphdr->un.echo.sequence: %d\t\n", icmphdr->un.echo.id, icmphdr->un.echo.sequence);
+    // printf("gdata.pid : %d\tp_seq: %d\t\n", gdata.pid , p_seq);
+    // printf("payload: %s (len=%ld)\tPAYLOAD: %s (len=%ld)\n", payload, strlen(payload), PAYLOAD, strlen(PAYLOAD));
     if (icmphdr->type == ICMP_ECHOREPLY &&
         icmphdr->code == 0 &&
         icmphdr->un.echo.id == gdata.pid &&
